@@ -1,17 +1,30 @@
 <template>
 	<div v-show="!isOnEditMode" v-html="blockInPlainHtml" @click="enterEditMode"></div>
 	<!-- <textarea v-show="isOnEditMode" v-model="blockContent" ref="textarea" @blur="exitEditMode"  @keyup="resizeTextarea"></textarea> -->
-	<CustomTextArea v-show="isOnEditMode" :initial-textarea-value="blockContent" ref="customTextarea" @blur="exitEditMode()" @textarea-content-update="updateBlockContent"/>
+	<CustomTextarea
+		v-show="isOnEditMode"
+		:initial-textarea-value="blockContent"
+		:custom-textarea-index="blockIndex"
+		:total-custom-textarea-count="totalBlockCount"
+		ref="customTextarea"
+		@textarea-content-update="updateBlockContent"
+		@edit-previous-block="editPreviousBlock"
+		@edit-next-block="editNextBlock"
+		@create-and-edit-next-block="createAndEditNextBlock"
+		@exit-edit-mode="exitEditMode"
+	/>
 </template>
 
 <script>
 import Cryptarch from '../cryptarch/cryptarch';
-import CustomTextArea from './CustomTextarea.vue';
+import CustomTextarea from './CustomTextarea.vue';
 
 export default {
 	name: 'EditorBlock',
 	props: {
+		blockIndex: Number,
     initialBlockContent: String,
+		totalBlockCount: Number,
   },
 	data() {
 		return {
@@ -28,21 +41,43 @@ export default {
 		},
 	},
 	methods: {
-		enterEditMode() { // make the text area appear AND focus on it
-			this.isOnEditMode = !this.isOnEditMode;
-			this.$nextTick(() => { // wait for the textarea to show up, then ...
+		enterEditMode() {
+			this.isOnEditMode = true;
+
+			this.$nextTick(() => { // wait for the textarea to show up, then make the text area appear AND focus on it
 				this.$refs.customTextarea.resizeAndFocus();
       });
 		},
 		exitEditMode() {
-			setTimeout(() => { this.isOnEditMode = !this.isOnEditMode; }, 100); // a timeout is necessary to be able to consistently edit other blocks BEFORE re-rendering the previously editted block; nextTick cannot achieve this I think
+			setTimeout(() => { this.isOnEditMode = false; }, 100); // a timeout is necessary to be able to consistently edit other blocks BEFORE re-rendering the previously editted block; nextTick cannot achieve this I think
+			// 0 to eliminate variables now
 		},
 		updateBlockContent(textareaContent) {
 			this.blockContent = textareaContent;
 		},
+		editPreviousBlock() {
+			this.exitEditMode();
+			this.$emit('editPreviousBlock', this.blockIndex);
+		},
+		editNextBlock() {
+			this.exitEditMode();
+			this.$emit('editNextBlock', this.blockIndex, '');
+		},
+		createAndEditNextBlock(currentBlockContent, nextBlockContent) {
+			this.blockContent = currentBlockContent;
+			this.exitEditMode();
+			this.$emit('createAndEditNextBlock', this.blockIndex, nextBlockContent);
+		},
 	},
+	emits: ['editNextBlock', 'editPreviousBlock', 'createAndEditNextBlock'],
 	components: {
-		CustomTextArea,
+		CustomTextarea,
+	},
+	watch: {
+		blockContent(newVal) {
+			// console.log(`newVal${newVal}`);
+			this.$refs.customTextarea.textareaContent = newVal;
+		},
 	},
 };
 </script>
@@ -50,7 +85,7 @@ export default {
 <style scoped>
 textarea {
 	border: none;
-	overflow: hidden;
+	overflow: hidden; /* prevent the scrollbar from appearing at all (auto can still lead to very brief appearances) */
 	outline: none;
 
 	-webkit-box-shadow: none;
@@ -61,5 +96,11 @@ textarea {
 
 	font-family: Avenir, Helvetica, Arial, sans-serif;
 	width: 100%;
+}
+
+div {
+	/* display: flex;
+	flex-direction: column; */
+	border: solid;
 }
 </style>

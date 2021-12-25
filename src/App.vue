@@ -15,7 +15,7 @@ export default {
 </script>
 
 <style>
-* { /* perhaps better way of resetting? */
+* { /* perhaps there's a better way of resetting? */
 	margin: 0;
 	padding: 0;
 }
@@ -27,5 +27,16 @@ export default {
   text-align: center;
   color: #2c3e50;
 	display: flex;
-	flex-direction: column;}
+	flex-direction: column;
+}
+
+/* div > ul {
+	display: flex;
+	flex-direction: column;
+} */
+
+/*
+li > ul {
+	display: block;
+} */
 </style>
