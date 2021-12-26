@@ -12,6 +12,7 @@
 		@edit-next-block="editNextBlock"
 		@create-and-edit-next-block="createAndEditNextBlock"
 		@exit-edit-mode="exitEditMode"
+		@delete-current-block-and-edit-previous-block="deleteCurrentBlockAndEditPreviousBlock"
 	/>
 </template>
 
@@ -46,7 +47,7 @@ export default {
 
 			this.$nextTick(() => { // wait for the textarea to show up, then make the text area appear AND focus on it
 				this.$refs.customTextarea.resizeAndFocus();
-      });
+			});
 		},
 		exitEditMode() {
 			setTimeout(() => { this.isOnEditMode = false; }, 100); // a timeout is necessary to be able to consistently edit other blocks BEFORE re-rendering the previously editted block; nextTick cannot achieve this I think
@@ -61,21 +62,25 @@ export default {
 		},
 		editNextBlock() {
 			this.exitEditMode();
-			this.$emit('editNextBlock', this.blockIndex, '');
+			this.$emit('editNextBlock', this.blockIndex);
 		},
-		createAndEditNextBlock(currentBlockContent, nextBlockContent) {
+		createAndEditNextBlock(currentBlockContent, contentForNextBlock) {
 			this.blockContent = currentBlockContent;
 			this.exitEditMode();
-			this.$emit('createAndEditNextBlock', this.blockIndex, nextBlockContent);
+			this.$emit('createAndEditNextBlock', this.blockIndex, contentForNextBlock);
+		},
+		deleteCurrentBlockAndEditPreviousBlock(contentForPreviousBlock) {
+			this.blockContent = '';
+			this.exitEditMode();
+			this.$emit('deleteCurrentBlockAndEditPreviousBlock', this.blockIndex, contentForPreviousBlock);
 		},
 	},
-	emits: ['editNextBlock', 'editPreviousBlock', 'createAndEditNextBlock'],
+	emits: ['editNextBlock', 'editPreviousBlock', 'createAndEditNextBlock', 'deleteCurrentBlockAndEditPreviousBlock'],
 	components: {
 		CustomTextarea,
 	},
 	watch: {
 		blockContent(newVal) {
-			// console.log(`newVal${newVal}`);
 			this.$refs.customTextarea.textareaContent = newVal;
 		},
 	},

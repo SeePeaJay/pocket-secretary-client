@@ -9,7 +9,7 @@
 		@keydown.up="isAtStartOfTexarea() && !isTheFirstTextarea() && editPreviousBlock()"
 		@keydown.down="isAtEndOfTexarea() && !isTheLastTextarea() && editNextBlock()"
 		@keydown.enter="createAndEditNextBlock"
-		@keydown.delete="isAtStartOfTexarea && $emit('removeCurrentBlockAndEditPreviousBlock')"
+		@keydown.delete="isAtStartOfTexarea() && !isTheFirstTextarea() && deleteCurrentBlockAndEditPreviousBlock()"
   >
   </textarea>
 </template>
@@ -46,24 +46,28 @@ export default {
 			this.$emit('editNextBlock');
 		},
 		isAtStartOfTexarea() {
-			if (this.$refs.textarea.selectionStart === 0) {
+			if (this.$refs.textarea.selectionEnd === 0) { // selectionEnd because selected text can end at the start of textarea and if you want to remove said text you shouldn't remove the block
 				return true;
 			}
 
 			return false;
 		},
 		isAtEndOfTexarea() {
-			if (this.$refs.textarea.selectionStart === this.textareaContent.length) {
+			if (this.$refs.textarea.selectionEnd === this.textareaContent.length) {
 				return true;
 			}
 
 			return false;
 		},
 		createAndEditNextBlock() {
-			const nextBlockContent = this.textareaContent.substring(this.$refs.textarea.selectionStart);
-			this.textareaContent = this.textareaContent.substring(0, this.$refs.textarea.selectionStart);
+			setTimeout(() => { // a timeout is necessary for \n to deposit in this textarea first, then take that character away and emit the event
+				const contentForNextBlock = this.textareaContent.substring(this.$refs.textarea.selectionStart);
+				this.textareaContent = this.textareaContent.substring(0, this.$refs.textarea.selectionStart - 1);
 
-			this.$emit('createAndEditNextBlock', this.textareaContent, nextBlockContent);
+				this.$emit('createAndEditNextBlock', this.textareaContent, contentForNextBlock);
+			}, 12);
+
+			// this.textareaContent = this.textareaContent.substring(0, this.$refs.textarea.selectionStart);
 		},
 		isTheFirstTextarea() {
 			return this.customTextareaIndex === 0;
@@ -71,11 +75,24 @@ export default {
 		isTheLastTextarea() {
 			return this.customTextareaIndex === this.totalCustomTextareaCount - 1;
 		},
+		deleteCurrentBlockAndEditPreviousBlock() {
+			setTimeout(() => { // a timeout is necessary for the backspace to occur in this textarea first, then emit the event
+				const contentForPreviousBlock = this.textareaContent;
+				this.textareaContent = '';
+
+				this.$emit('deleteCurrentBlockAndEditPreviousBlock', contentForPreviousBlock);
+			}, 12);
+		},
 	},
-	emits: ['textareaContentUpdate', 'editNextBlock', 'editPreviousBlock', 'exitEditMode', 'createAndEditNextBlock', 'removeCurrentBlockAndEditPreviousBlock'],
+	emits: ['textareaContentUpdate', 'editNextBlock', 'editPreviousBlock', 'exitEditMode', 'createAndEditNextBlock', 'deleteCurrentBlockAndEditPreviousBlock'],
 	mounted() {
 		this.resizeAndFocus();
 		// this.resizeTextarea();
+	},
+	watch: {
+		textareaContent(newVal) {
+			console.log(`Textarea content:${newVal}`);
+		},
 	},
 };
 </script>
