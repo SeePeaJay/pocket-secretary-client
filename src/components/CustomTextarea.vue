@@ -96,23 +96,11 @@ export default {
 			return false;
 		},
 		createAndEditNextBlock() {
-			const contentForNextBlock = this.textareaContent.substring(this.$refs.textarea.selectionStart);
-			this.textareaContent = this.textareaContent.substring(0, this.$refs.textarea.selectionStart);
+			const contentForNextBlock = this.$refs.textarea.value.substring(this.$refs.textarea.selectionStart); // can also use this.textareaContent, but this.$refs.textarea.value is consistent with deleteCurrent...
+			this.textareaContent = this.$refs.textarea.value.substring(0, this.$refs.textarea.selectionStart);
 			this.$emit('createAndEditNextBlock', contentForNextBlock);
-
-			// setTimeout(() => { // a timeout is necessary for \n to deposit in this textarea first, then take that character away and emit the event
-			// 	const contentForNextBlock = this.$refs.textarea.value.substring(this.$refs.textarea.selectionStart); // note that textareaContent is NOT in sync w/ textarea.value yet
-			// 	// console.log(`contentForNextBlock: ${contentForNextBlock}`);
-
-			// 	this.textareaContent = this.$refs.textarea.value.substring(0, this.$refs.textarea.selectionStart - 1);
-			// 	// console.log(`textareaContent: ${this.textareaContent}`);
-
-			// 	this.$emit('createAndEditNextBlock', contentForNextBlock);
-			// }, 100);
 		},
 		shouldBackspaceKeyDeleteCurrentBlockAndEditPreviousBlock($keydownEvent) {
-			// console.log($keydownEvent);
-
 			if ($keydownEvent.keyCode === 8 && this.isAtStartOfTexarea() && !this.isTheFirstTextarea()) { // make sure it's actually backspace and not delete key
 				$keydownEvent.preventDefault();
 
@@ -122,7 +110,7 @@ export default {
 			return false;
 		},
 		deleteCurrentBlockAndEditPreviousBlock() {
-			const contentForPreviousBlock = this.textareaContent;
+			const contentForPreviousBlock = this.$refs.textarea.value; // this.textareaContent is not used here because it may be outdated compared to the actual textarea value at this point (textareaContent does not track any changes to the textarea value before this function is called)
 			this.textareaContent = ''; // look better?
 			this.$emit('deleteCurrentBlockAndEditPreviousBlock', contentForPreviousBlock);
 		},
