@@ -1,5 +1,5 @@
 <template>
-	<Editor :engram="engram"/>
+	<Editor :engramId="1"/>
 </template>
 
 <script>

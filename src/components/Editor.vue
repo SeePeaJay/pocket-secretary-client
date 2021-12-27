@@ -2,12 +2,10 @@
   <div class="editor-pane">
 		<div class="editor-area">
 			<EditorBlock
-				v-for="(engramBlock, index) in engramBlocks"
-				:key="engramBlock"
+				v-for="(engramBlock, index) in engramBlocks" :key="index"
 				:ref="el => { if (el) editorBlocks[index] = el }"
+				:engram-id="engramId"
 				:block-index="index"
-				:initial-block-content="engramBlock"
-				:total-block-count="engramBlocks.length"
 				@edit-previous-block="editPreviousBlock"
 				@edit-next-block="editNextBlock"
 				@create-and-edit-next-block="createAndEditNextBlock"
@@ -18,88 +16,107 @@
 </template>
 
 <script>
-import { ref, onBeforeUpdate, nextTick } from 'vue';
-import { RULES } from '../cryptarch/constants';
+import {
+	computed, ref, onBeforeUpdate, nextTick,
+} from 'vue';
+import { useStore } from 'vuex';
+// import { RULES } from '../cryptarch/constants';
 import EditorBlock from './EditorBlock.vue';
 
 export default {
   name: 'Editor',
   props: {
-    engram: String,
+		engramId: Number,
   },
 	setup(props) {
-		const engramBlocks = ref(props.engram.split(RULES.rootBlockSeparator));
+		const store = useStore();
+
+		const engramBlocks = computed(() => store.state.engrams.find((engram) => engram.id === props.engramId).blocks);
 		const editorBlocks = ref([]);
 
 		function editPreviousBlock(currentBlockIndex, contentForPreviousBlock = null) {
 			if (currentBlockIndex > 0) { // make sure current block is not the first one
 				const previousBlockIndex = currentBlockIndex - 1;
 
-				editorBlocks.value[previousBlockIndex].enterEditMode();
+				if (contentForPreviousBlock !== null) { // comes from deleteCurrentBlockAndEditPreviousBlock
+					// const currentBlockContent = engramBlocks
+					const payload = {
+						engramId: props.engramId,
+						blockIndex: previousBlockIndex,
+						blockContent: engramBlocks.value[previousBlockIndex] + contentForPreviousBlock,
+					};
 
-				if (contentForPreviousBlock) {
-					editorBlocks.value[previousBlockIndex].blockContent += contentForPreviousBlock;
+					store.commit('updateEngramBlock', payload);
+
+					nextTick(() => {
+						editorBlocks.value[previousBlockIndex].enterEditMode();
+					});
+				} else {
+					editorBlocks.value[previousBlockIndex].enterEditMode();
 				}
 			}
-
-			console.log(engramBlocks.value); // answering above q: seems like it?
 		}
 
 		function editNextBlock(currentBlockIndex, contentForNextBlock = null) {
-			if (currentBlockIndex < engramBlocks.value.length - 1) { // make sure current block is not the last one
-				nextTick(() => {
-					const nextBlockIndex = currentBlockIndex + 1;
+			if (currentBlockIndex < engramBlocks.value.length - 1) { // make sure current block is not the last one, as 'next block' would not exist
+				const nextBlockIndex = currentBlockIndex + 1;
 
+				if (contentForNextBlock !== null) { // comes from createAndEditNextBlock
+					const payload = {
+						engramId: props.engramId,
+						blockIndex: nextBlockIndex,
+						blockContent: contentForNextBlock,
+					};
+
+					store.commit('updateEngramBlock', payload);
+
+					nextTick(() => {
+						editorBlocks.value[nextBlockIndex].enterEditMode();
+					});
+				} else {
 					editorBlocks.value[nextBlockIndex].enterEditMode();
-
-					console.log(contentForNextBlock);
-
-					// if (contentForNextBlock) {
-					// 	editorBlocks.value[nextBlockIndex].blockContent = contentForNextBlock;
-					// 	// nextTick(() => {
-					// 	// 	editorBlocks.value[currentBlockIndex + 1].blockContent = contentForNextBlock;
-					// 	// 	console.log(editorBlocks.value[currentBlockIndex + 1].blockContent);
-					// 	// });
-					// }
-				});
+				}
 			}
-
-			console.log(engramBlocks.value); // answering above q: seems like it?
 		}
 
 		function createAndEditNextBlock(currentBlockIndex, contentForNextBlock) {
-			const currentEngramBlock = engramBlocks.value[currentBlockIndex];
-			engramBlocks.value[currentBlockIndex] = currentEngramBlock.substring(0, currentEngramBlock.length - contentForNextBlock.length);
+			const payload = {
+				engramId: props.engramId,
+				blockIndex: currentBlockIndex + 1,
+				blockContent: '',
+			};
 
-			if (currentBlockIndex !== engramBlocks.value.length - 1) {
-				engramBlocks.value.splice(currentBlockIndex + 1, 0, contentForNextBlock);
-			} else {
-				engramBlocks.value.push(contentForNextBlock);
-			}
+			store.commit('createEngramBlock', payload);
+
+			// console.log(`currentBlockIndex at Editor: ${currentBlockIndex}`);
+			// console.log(engramBlocks.value);
 
 			nextTick(() => {
-				// console.log(editorBlocks.value[currentBlockIndex + 1].blockContent);
-				// console.log(engramBlocks.value[currentBlockIndex + 1]);
 				editNextBlock(currentBlockIndex, contentForNextBlock);
-				console.log(engramBlocks.value); // answering above q: seems like it?
-				// console.log(currentEngramBlock);
 			});
+
+			// nextTick(() => {
+			// 	// console.log(editorBlocks.value[currentBlockIndex + 1].blockContent);
+			// 	// console.log(engramBlocks.value[currentBlockIndex + 1]);
+			// 	editNextBlock(currentBlockIndex);
+			// 	// console.log(engramBlocks.value); // answering above q: seems like it?
+			// 	// console.log(currentEngramBlock);
+			// });
 		}
 
 		function deleteCurrentBlockAndEditPreviousBlock(currentBlockIndex, contentForPreviousBlock) {
-			if (currentBlockIndex > 0) {
-				engramBlocks.value[currentBlockIndex - 1] += contentForPreviousBlock;
-			}
+			const payload = {
+				engramId: props.engramId,
+				blockIndex: currentBlockIndex,
+			};
 
-			engramBlocks.value.splice(currentBlockIndex, 1); // same as above - set value for previous??
+			store.commit('deleteEngramBlock', payload);
 
 			nextTick(() => {
 				// console.log(editorBlocks.value[currentBlockIndex - 1].blockContent);
 				// console.log(engramBlocks.value[currentBlockIndex - 1]);
 				editPreviousBlock(currentBlockIndex, contentForPreviousBlock);
-				console.log(engramBlocks.value);
 			});
-
 			return '';
 		}
 
