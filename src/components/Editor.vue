@@ -20,11 +20,13 @@ import {
 	computed, ref, onBeforeUpdate, nextTick,
 } from 'vue';
 import { useStore } from 'vuex';
-// import { RULES } from '../cryptarch/constants';
 import EditorBlock from './EditorBlock.vue';
 
 export default {
   name: 'Editor',
+	components: {
+		EditorBlock,
+	},
   props: {
 		engramId: Number,
   },
@@ -39,7 +41,6 @@ export default {
 				const previousBlockIndex = currentBlockIndex - 1;
 
 				if (contentForPreviousBlock !== null) { // comes from deleteCurrentBlockAndEditPreviousBlock
-					// const currentBlockContent = engramBlocks
 					const payload = {
 						engramId: props.engramId,
 						blockIndex: previousBlockIndex,
@@ -88,20 +89,9 @@ export default {
 
 			store.commit('createEngramBlock', payload);
 
-			// console.log(`currentBlockIndex at Editor: ${currentBlockIndex}`);
-			// console.log(engramBlocks.value);
-
 			nextTick(() => {
 				editNextBlock(currentBlockIndex, contentForNextBlock);
 			});
-
-			// nextTick(() => {
-			// 	// console.log(editorBlocks.value[currentBlockIndex + 1].blockContent);
-			// 	// console.log(engramBlocks.value[currentBlockIndex + 1]);
-			// 	editNextBlock(currentBlockIndex);
-			// 	// console.log(engramBlocks.value); // answering above q: seems like it?
-			// 	// console.log(currentEngramBlock);
-			// });
 		}
 
 		function deleteCurrentBlockAndEditPreviousBlock(currentBlockIndex, contentForPreviousBlock) {
@@ -113,8 +103,6 @@ export default {
 			store.commit('deleteEngramBlock', payload);
 
 			nextTick(() => {
-				// console.log(editorBlocks.value[currentBlockIndex - 1].blockContent);
-				// console.log(engramBlocks.value[currentBlockIndex - 1]);
 				editPreviousBlock(currentBlockIndex, contentForPreviousBlock);
 			});
 			return '';
@@ -133,9 +121,6 @@ export default {
 			createAndEditNextBlock,
 			deleteCurrentBlockAndEditPreviousBlock,
 		};
-	},
-	components: {
-		EditorBlock,
 	},
 };
 </script>

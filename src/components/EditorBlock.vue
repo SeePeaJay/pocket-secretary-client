@@ -1,5 +1,5 @@
 <template>
-	<div v-show="!isOnEditMode" v-html="blockInPlainHtml" @click="enterEditMode"></div>
+	<div v-show="!isOnEditMode" @click="enterEditMode" v-html="blockInPlainHtml"></div>
 	<CustomTextarea
 		v-show="isOnEditMode"
 		ref="customTextarea"
@@ -19,10 +19,14 @@ import CustomTextarea from './CustomTextarea.vue';
 
 export default {
 	name: 'EditorBlock',
+	components: {
+		CustomTextarea,
+	},
 	props: {
 		engramId: Number,
 		blockIndex: Number,
   },
+	emits: ['editNextBlock', 'editPreviousBlock', 'createAndEditNextBlock', 'deleteCurrentBlockAndEditPreviousBlock'],
 	data() {
 		return {
 			isOnEditMode: false,
@@ -37,9 +41,6 @@ export default {
 			cryptarch = null; // is there a better way to prevent memory leak than this?
 
 			return html;
-		},
-		engramContent() {
-			return this.$store.state.engrams.find((engram) => engram.id === this.engramId).blocks[this.customTextareaIndex];
 		},
 	},
 	methods: {
@@ -64,23 +65,12 @@ export default {
 		},
 		createAndEditNextBlock(contentForNextBlock) {
 			this.exitEditMode();
-			// console.log(`this block index at editor block: ${this.blockIndex}`);
 			this.$emit('createAndEditNextBlock', this.blockIndex, contentForNextBlock);
 		},
 		deleteCurrentBlockAndEditPreviousBlock(contentForPreviousBlock) {
 			this.exitEditMode();
 			this.$emit('deleteCurrentBlockAndEditPreviousBlock', this.blockIndex, contentForPreviousBlock);
 		},
-	},
-	watch: {
-		engramContent(newVal) {
-			console.log(newVal);
-			console.log(`isOneditmode: ${this.isOnEditMode}`);
-		},
-	},
-	emits: ['editNextBlock', 'editPreviousBlock', 'createAndEditNextBlock', 'deleteCurrentBlockAndEditPreviousBlock'],
-	components: {
-		CustomTextarea,
 	},
 };
 </script>

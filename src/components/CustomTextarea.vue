@@ -6,8 +6,8 @@
 		@blur="textareaContent = $event.target.value; $emit('exitEditMode');"
     @focus="resizeTextarea"
     @keyup="resizeTextarea"
-		@keydown.up="isAtStartOfTexarea() && !isTheFirstTextarea() && editPreviousBlock()"
-		@keydown.down="isAtEndOfTexarea() && !isTheLastTextarea() && editNextBlock()"
+		@keydown.up="isAtStartOfTexarea() && !isTheFirstTextarea() && $emit('editPreviousBlock')"
+		@keydown.down="isAtEndOfTexarea() && !isTheLastTextarea() && $emit('editNextBlock')"
 		@keydown.enter="shouldEnterKeyCreateAndEditNextBlock($event) && createAndEditNextBlock()"
 		@keydown.delete="shouldBackspaceKeyDeleteCurrentBlockAndEditPreviousBlock($event) && deleteCurrentBlockAndEditPreviousBlock()"
   >
@@ -16,10 +16,12 @@
 
 <script>
 export default {
+	name: 'CustomTextarea',
 	props: {
 		engramId: Number,
 		customTextareaIndex: Number,
 	},
+	emits: ['exitEditMode', 'editPreviousBlock', 'editNextBlock', 'createAndEditNextBlock', 'deleteCurrentBlockAndEditPreviousBlock'],
 	computed: {
 		textareaContent: {
 			get() {
@@ -32,21 +34,12 @@ export default {
 					blockContent: value,
 				};
 
-				// const { engramId } = this;
-				// const blockIndex = this.customTextareaIndex;
-				// const blockContent = value;
-
-				// console.log(`engramId at custom: ${engramId}`);
-				// console.log(`customTextareaIndex at custom: ${customTextareaIndex}`);
-				// console.log(`value at custom: ${value}`);
-
 				this.$store.commit('updateEngramBlock', payload);
-
-				// console.log(`engramId at custom: ${engramId}`);
-				// console.log(`customTextareaIndex at custom: ${customTextareaIndex}`);
-				// console.log(`value at custom: ${value}`);
 			},
 		},
+	},
+	mounted() {
+		this.resizeAndFocus();
 	},
 	methods: {
 		resizeAndFocus() {
@@ -77,16 +70,7 @@ export default {
 
 			return this.customTextareaIndex === totalBlockCount - 1;
 		},
-		editPreviousBlock() {
-			this.$emit('editPreviousBlock');
-		},
-		editNextBlock() {
-			// this.textareaContent = this.textareaContent.slice(0, -1);
-			this.$emit('editNextBlock');
-		},
 		shouldEnterKeyCreateAndEditNextBlock($keydownEvent) {
-			// console.log($keydownEvent);
-
 			if ($keydownEvent.keyCode === 13 && !$keydownEvent.shiftKey) {
 				$keydownEvent.preventDefault();
 
@@ -114,10 +98,6 @@ export default {
 			this.textareaContent = ''; // look better?
 			this.$emit('deleteCurrentBlockAndEditPreviousBlock', contentForPreviousBlock);
 		},
-	},
-	emits: ['exitEditMode', 'editPreviousBlock', 'editNextBlock', 'createAndEditNextBlock', 'deleteCurrentBlockAndEditPreviousBlock'],
-	mounted() {
-		this.resizeAndFocus();
 	},
 };
 </script>
