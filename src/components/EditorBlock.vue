@@ -76,24 +76,7 @@ export default {
 </script>
 
 <style scoped>
-textarea {
-	border: none;
-	overflow: hidden; /* prevent the scrollbar from appearing at all (auto can still lead to very brief appearances) */
-	outline: none;
-
-	-webkit-box-shadow: none;
-	-moz-box-shadow: none;
-	box-shadow: none;
-
-	resize: none; /*remove the resize handle on the bottom right*/
-
-	font-family: Avenir, Helvetica, Arial, sans-serif;
-	width: 100%;
-}
-
 div {
-	/* display: flex;
-	flex-direction: column; */
 	border: solid;
 }
 </style>
