@@ -21,6 +21,9 @@ export default createStore({
 					'A paragraph with an inline image: $http://static.wikia.nocookie.net/ninjajojos-bizarre-adventure/images/f/f7/Made_in_Heaven.png/revision/latest/top-crop/width/360/height/450?cb=20210721002513{}.',
 				],
 			},
+			{
+				id: 2,
+			},
 		],
   },
   mutations: {
@@ -36,7 +39,7 @@ export default createStore({
 
 			state.engrams.find((engram) => engram.id === engramId).blocks[blockIndex] = blockContent;
 
-			console.log([...new Proxy(state.engrams.find((engram) => engram.id === engramId).blocks, [])]);
+			// console.log([...new Proxy(state.engrams.find((engram) => engram.id === engramId).blocks, [])]);
 		},
 		deleteEngramBlock(state, { engramId, blockIndex }) {
 			state.engrams.find((engram) => engram.id === engramId).blocks.splice(blockIndex, 1);
