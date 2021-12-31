@@ -27,4 +27,8 @@ nav > * {
 	filter: invert(67%) sepia(0%) saturate(261%) hue-rotate(157deg) brightness(88%) contrast(79%); /* = #919191 */
 	margin: 8px;
 }
+
+nav > *:hover {
+	filter: brightness(0%);; /* = #000000 */
+}
 </style>

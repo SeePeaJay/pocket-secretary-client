@@ -125,7 +125,6 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .editor-pane {
 	height: calc(100vh - 40px);
@@ -140,5 +139,6 @@ export default {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
+	margin: 8px 0 8px;
 }
 </style>
