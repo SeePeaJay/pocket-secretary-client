@@ -25,7 +25,7 @@ export default {
 	computed: {
 		textareaContent: {
 			get() {
-				return this.$store.state.engrams.find((engram) => engram.id === this.engramId).blocks[this.customTextareaIndex];
+				return this.$store.state.engrams.find((engram) => engram.id === this.engramId).rootBlocks[this.customTextareaIndex];
 			},
 			set(value) {
 				const payload = {
@@ -67,7 +67,7 @@ export default {
 			return this.customTextareaIndex === 0;
 		},
 		isTheLastTextarea() {
-			const totalBlockCount = this.$store.state.engrams.find((engram) => engram.id === this.engramId).blocks.length;
+			const totalBlockCount = this.$store.state.engrams.find((engram) => engram.id === this.engramId).rootBlocks.length;
 
 			return this.customTextareaIndex === totalBlockCount - 1;
 		},

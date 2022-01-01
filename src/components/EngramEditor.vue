@@ -1,9 +1,9 @@
 <template>
-  <div class="editor-pane">
-		<div class="editor-area">
-			<EditorBlock
+  <div class="engram-editor-pane">
+		<div class="engram-editor-area">
+			<EngramBlockEditor
 				v-for="(engramBlock, index) in engramBlocks" :key="index"
-				:ref="el => { if (el) editorBlocks[index] = el }"
+				:ref="el => { if (el) engramBlockEditors[index] = el }"
 				:engram-id="engramId"
 				:block-index="index"
 				@edit-previous-block="editPreviousBlock"
@@ -20,12 +20,12 @@ import {
 	computed, ref, onBeforeUpdate, nextTick,
 } from 'vue';
 import { useStore } from 'vuex';
-import EditorBlock from './EditorBlock.vue';
+import EngramBlockEditor from './EngramBlockEditor.vue';
 
 export default {
-  name: 'Editor',
+  name: 'EngramEditor',
 	components: {
-		EditorBlock,
+		EngramBlockEditor,
 	},
   props: {
 		engramId: Number,
@@ -33,8 +33,8 @@ export default {
 	setup(props) {
 		const store = useStore();
 
-		const engramBlocks = computed(() => store.state.engrams.find((engram) => engram.id === props.engramId).blocks);
-		const editorBlocks = ref([]);
+		const engramBlocks = computed(() => store.state.engrams.find((engram) => engram.id === props.engramId).rootBlocks);
+		const engramBlockEditors = ref([]);
 
 		function editPreviousBlock(currentBlockIndex, contentForPreviousBlock = null) {
 			if (currentBlockIndex > 0) { // make sure current block is not the first one
@@ -50,10 +50,10 @@ export default {
 					store.commit('updateEngramBlock', payload);
 
 					nextTick(() => {
-						editorBlocks.value[previousBlockIndex].enterEditMode();
+						engramBlockEditors.value[previousBlockIndex].enterEditMode();
 					});
 				} else {
-					editorBlocks.value[previousBlockIndex].enterEditMode();
+					engramBlockEditors.value[previousBlockIndex].enterEditMode();
 				}
 			}
 		}
@@ -72,10 +72,10 @@ export default {
 					store.commit('updateEngramBlock', payload);
 
 					nextTick(() => {
-						editorBlocks.value[nextBlockIndex].enterEditMode();
+						engramBlockEditors.value[nextBlockIndex].enterEditMode();
 					});
 				} else {
-					editorBlocks.value[nextBlockIndex].enterEditMode();
+					engramBlockEditors.value[nextBlockIndex].enterEditMode();
 				}
 			}
 		}
@@ -110,12 +110,12 @@ export default {
 
 		// make sure to reset the refs before each update
 		onBeforeUpdate(() => {
-			editorBlocks.value = [];
+			engramBlockEditors.value = [];
 		});
 
 		return {
 			engramBlocks,
-			editorBlocks,
+			engramBlockEditors,
 			editPreviousBlock,
 			editNextBlock,
 			createAndEditNextBlock,
@@ -126,7 +126,7 @@ export default {
 </script>
 
 <style scoped>
-.editor-pane {
+.engram-editor-pane {
 	height: calc(100vh - 40px);
 	overflow-y: scroll;
 	display: flex;
@@ -134,7 +134,7 @@ export default {
 	align-items: center;
 }
 
-.editor-area{
+.engram-editor-area{
 	width: 50%;
 	display: flex;
 	flex-direction: column;

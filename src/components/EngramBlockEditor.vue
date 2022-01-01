@@ -18,7 +18,7 @@ import Cryptarch from '../cryptarch/cryptarch';
 import CustomTextarea from './CustomTextarea.vue';
 
 export default {
-	name: 'EditorBlock',
+	name: 'EngramBlockEditor',
 	components: {
 		CustomTextarea,
 	},
@@ -34,7 +34,7 @@ export default {
 	},
 	computed: {
 		blockInPlainHtml() {
-			const blockContent = this.$store.state.engrams.find((engram) => engram.id === this.engramId).blocks[this.blockIndex];
+			const blockContent = this.$store.state.engrams.find((engram) => engram.id === this.engramId).rootBlocks[this.blockIndex];
 
 			let cryptarch = new Cryptarch();
 			const html = cryptarch.decrypt(blockContent);

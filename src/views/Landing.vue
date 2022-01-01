@@ -1,14 +1,14 @@
 <template>
-	<Editor :engramId="1"/>
+	<EngramEditor :engramId="1"/>
 </template>
 
 <script>
-import Editor from '../components/Editor.vue';
+import EngramEditor from '../components/EngramEditor.vue';
 
 export default {
 	name: 'Landing',
 	components: {
-		Editor,
+		EngramEditor,
   },
 };
 </script>

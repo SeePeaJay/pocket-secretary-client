@@ -5,7 +5,7 @@ export default createStore({
 		engrams: [
 			{
 				id: 1,
-				blocks: [
+				rootBlocks: [
 					'* Title',
 					'*_1 Level 1 Subtitle',
 					'*_2 Level 2 Subtitle',
@@ -29,7 +29,7 @@ export default createStore({
   mutations: {
 		createEngramBlock(state, { engramId, blockIndex, blockContent }) {
 			// console.log([...new Proxy(state.engrams.find((engram) => engram.id === engramId).blocks, [])]);
-			state.engrams.find((engram) => engram.id === engramId).blocks.splice(blockIndex, 0, blockContent);
+			state.engrams.find((engram) => engram.id === engramId).rootBlocks.splice(blockIndex, 0, blockContent);
 			// console.log([...new Proxy(state.engrams.find((engram) => engram.id === engramId).blocks, [])]);
 		},
 		updateEngramBlock(state, { engramId, blockIndex, blockContent }) {
@@ -37,12 +37,12 @@ export default createStore({
 			// console.log(`blockIndex at store: ${blockIndex}`);
 			// console.log(`blockContent at store: ${blockContent}`);
 
-			state.engrams.find((engram) => engram.id === engramId).blocks[blockIndex] = blockContent;
+			state.engrams.find((engram) => engram.id === engramId).rootBlocks[blockIndex] = blockContent;
 
-			// console.log([...new Proxy(state.engrams.find((engram) => engram.id === engramId).blocks, [])]);
+			console.log([...new Proxy(state.engrams.find((engram) => engram.id === engramId).rootBlocks, [])]);
 		},
 		deleteEngramBlock(state, { engramId, blockIndex }) {
-			state.engrams.find((engram) => engram.id === engramId).blocks.splice(blockIndex, 1);
+			state.engrams.find((engram) => engram.id === engramId).rootBlocks.splice(blockIndex, 1);
 		},
   },
   actions: {
