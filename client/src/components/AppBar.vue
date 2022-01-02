@@ -3,13 +3,20 @@
 		<router-link to="/all">
 			<img src="../assets/stack-2.svg" alt="tabler stack-2 icon" />
 		</router-link>
-		<img src="../assets/logout.svg" alt="tabler logout icon" />
+		<a v-if="!isLoggedIn" href="auth/github">
+			<img src="../assets/login.svg" alt="tabler login icon" />
+		</a>
 	</nav>
 </template>
 
 <script>
 export default {
 	name: 'AppBar',
+	data() {
+		return {
+			isLoggedIn: false,
+		};
+	},
 };
 </script>
 
