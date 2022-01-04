@@ -27,6 +27,9 @@ export default createStore({
 		],
   },
   mutations: {
+		setEngrams(state, engramDataArray) {
+			state.engrams = engramDataArray;
+		},
 		createEngramBlock(state, { engramId, blockIndex, blockContent }) {
 			// console.log([...new Proxy(state.engrams.find((engram) => engram.id === engramId).blocks, [])]);
 			state.engrams.find((engram) => engram.id === engramId).rootBlocks.splice(blockIndex, 0, blockContent);
@@ -46,6 +49,9 @@ export default createStore({
 		},
   },
   actions: {
+		// async fetchEngrams({ commit }) {
+
+		// }
   },
   modules: {
   },

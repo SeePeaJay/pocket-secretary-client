@@ -12,6 +12,7 @@
 
 <script>
 // import Editor from '../components/Editor.vue';
+import axios from 'axios';
 
 export default {
   name: 'AllEngrams',
@@ -19,6 +20,11 @@ export default {
 		allEngrams() {
 			return this.$store.state.engrams;
 		},
+	},
+	mounted() {
+		axios.get('http://localhost:3000/all').then((response) => {
+			console.log(response);
+		});
 	},
 };
 </script>
