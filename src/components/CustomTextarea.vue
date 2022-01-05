@@ -18,18 +18,18 @@
 export default {
 	name: 'CustomTextarea',
 	props: {
-		engramId: Number,
+		engramTitle: String,
 		customTextareaIndex: Number,
 	},
 	emits: ['exitEditMode', 'editPreviousBlock', 'editNextBlock', 'createAndEditNextBlock', 'deleteCurrentBlockAndEditPreviousBlock'],
 	computed: {
 		textareaContent: {
 			get() {
-				return this.$store.state.engrams.find((engram) => engram.id === this.engramId).rootBlocks[this.customTextareaIndex];
+				return this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.customTextareaIndex];
 			},
 			set(value) {
 				const payload = {
-					engramId: this.engramId,
+					engramTitle: this.engramTitle,
 					blockIndex: this.customTextareaIndex,
 					blockContent: value,
 				};
@@ -67,7 +67,7 @@ export default {
 			return this.customTextareaIndex === 0;
 		},
 		isTheLastTextarea() {
-			const totalBlockCount = this.$store.state.engrams.find((engram) => engram.id === this.engramId).rootBlocks.length;
+			const totalBlockCount = this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks.length;
 
 			return this.customTextareaIndex === totalBlockCount - 1;
 		},

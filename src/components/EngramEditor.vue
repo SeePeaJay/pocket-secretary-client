@@ -4,7 +4,7 @@
 			<EngramBlockEditor
 				v-for="(engramBlock, index) in engramBlocks" :key="index"
 				:ref="el => { if (el) engramBlockEditors[index] = el }"
-				:engram-id="engramId"
+				:engram-title="engramTitle"
 				:block-index="index"
 				@edit-previous-block="editPreviousBlock"
 				@edit-next-block="editNextBlock"
@@ -28,12 +28,12 @@ export default {
 		EngramBlockEditor,
 	},
   props: {
-		engramId: Number,
+		engramTitle: String,
   },
 	setup(props) {
 		const store = useStore();
 
-		const engramBlocks = computed(() => store.state.engrams.find((engram) => engram.id === props.engramId).rootBlocks);
+		const engramBlocks = computed(() => store.state.engrams.find((engram) => engram.title === props.engramTitle).rootBlocks);
 		const engramBlockEditors = ref([]);
 
 		function editPreviousBlock(currentBlockIndex, contentForPreviousBlock = null) {
@@ -42,7 +42,7 @@ export default {
 
 				if (contentForPreviousBlock !== null) { // comes from deleteCurrentBlockAndEditPreviousBlock
 					const payload = {
-						engramId: props.engramId,
+						engramTitle: props.engramTitle,
 						blockIndex: previousBlockIndex,
 						blockContent: engramBlocks.value[previousBlockIndex] + contentForPreviousBlock,
 					};
@@ -64,7 +64,7 @@ export default {
 
 				if (contentForNextBlock !== null) { // comes from createAndEditNextBlock
 					const payload = {
-						engramId: props.engramId,
+						engramTitle: props.engramTitle,
 						blockIndex: nextBlockIndex,
 						blockContent: contentForNextBlock,
 					};
@@ -82,7 +82,7 @@ export default {
 
 		function createAndEditNextBlock(currentBlockIndex, contentForNextBlock) {
 			const payload = {
-				engramId: props.engramId,
+				engramTitle: props.engramTitle,
 				blockIndex: currentBlockIndex + 1,
 				blockContent: '',
 			};
@@ -96,7 +96,7 @@ export default {
 
 		function deleteCurrentBlockAndEditPreviousBlock(currentBlockIndex, contentForPreviousBlock) {
 			const payload = {
-				engramId: props.engramId,
+				engramTitle: props.engramTitle,
 				blockIndex: currentBlockIndex,
 			};
 

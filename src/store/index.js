@@ -1,10 +1,11 @@
 import { createStore } from 'vuex';
+import { RULES } from '../cryptarch/constants';
 
 export default createStore({
   state: {
 		engrams: [
 			{
-				id: 1,
+				title: 'Title',
 				rootBlocks: [
 					'* Title',
 					'*_1 Level 1 Subtitle',
@@ -21,31 +22,34 @@ export default createStore({
 					'A paragraph with an inline image: $http://static.wikia.nocookie.net/ninjajojos-bizarre-adventure/images/f/f7/Made_in_Heaven.png/revision/latest/top-crop/width/360/height/450?cb=20210721002513{}.',
 				],
 			},
-			{
-				id: 2,
-			},
 		],
   },
   mutations: {
-		setEngrams(state, engramDataArray) {
-			state.engrams = engramDataArray;
+		setEngrams(state, engramDataArray) { // the content needs to be decoded first, then parsed into rootBlocks.
+			state.engrams.push(...engramDataArray.map((engramData) => ({
+				title: engramData.title,
+				rootBlocks: Buffer.from(engramData.content, 'base64').toString('ascii').split(RULES.rootBlockSeparator),
+			})));
+			// observation: concat works weird with Proxy
+
+			console.log(state.engrams);
 		},
-		createEngramBlock(state, { engramId, blockIndex, blockContent }) {
-			// console.log([...new Proxy(state.engrams.find((engram) => engram.id === engramId).blocks, [])]);
-			state.engrams.find((engram) => engram.id === engramId).rootBlocks.splice(blockIndex, 0, blockContent);
-			// console.log([...new Proxy(state.engrams.find((engram) => engram.id === engramId).blocks, [])]);
+		createEngramBlock(state, { engramTitle, blockIndex, blockContent }) {
+			// console.log([...new Proxy(state.engrams.find((engram) => engram.title === engramTitle).blocks, [])]);
+			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks.splice(blockIndex, 0, blockContent);
+			// console.log([...new Proxy(state.engrams.find((engram) => engram.title === engramTitle).blocks, [])]);
 		},
-		updateEngramBlock(state, { engramId, blockIndex, blockContent }) {
-			// console.log(`engramId at store: ${engramId}`);
+		updateEngramBlock(state, { engramTitle, blockIndex, blockContent }) {
+			// console.log(`engramTitle at store: ${engramTitle}`);
 			// console.log(`blockIndex at store: ${blockIndex}`);
 			// console.log(`blockContent at store: ${blockContent}`);
 
-			state.engrams.find((engram) => engram.id === engramId).rootBlocks[blockIndex] = blockContent;
+			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks[blockIndex] = blockContent;
 
-			console.log([...new Proxy(state.engrams.find((engram) => engram.id === engramId).rootBlocks, [])]);
+			console.log([...new Proxy(state.engrams.find((engram) => engram.title === engramTitle).rootBlocks, [])]);
 		},
-		deleteEngramBlock(state, { engramId, blockIndex }) {
-			state.engrams.find((engram) => engram.id === engramId).rootBlocks.splice(blockIndex, 1);
+		deleteEngramBlock(state, { engramTitle, blockIndex }) {
+			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks.splice(blockIndex, 1);
 		},
   },
   actions: {

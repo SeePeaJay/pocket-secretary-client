@@ -1,17 +1,23 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Landing from '../views/Landing.vue';
-import AllEngrams from '../views/AllEngrams.vue';
+// import Landing from '../views/Landing.vue';
+import Engrams from '../views/Engrams.vue';
+import Engram from '../views/Engram.vue';
 
 const routes = [
+	// {
+	// 	path: '/',
+	// 	name: 'Landing',
+	// 	component: Landing,
+	// },
 	{
-		path: '/',
-		name: 'Landing',
-		component: Landing,
+		path: '/engrams',
+		name: 'Engrams',
+		component: Engrams,
 	},
 	{
-		path: '/all',
-		name: 'All Engrams',
-		component: AllEngrams,
+		path: '/engrams/:engramTitle',
+		name: 'engram',
+		component: Engram,
 	},
 ];
 

@@ -1,14 +1,19 @@
 <template>
-	<EngramEditor engram-title="Title"/>
+	<EngramEditor :engram-title="engramTitle"/>
 </template>
 
 <script>
 import EngramEditor from '../components/EngramEditor.vue';
 
 export default {
-	name: 'Landing',
+	name: 'Engram',
 	components: {
 		EngramEditor,
   },
+	computed: {
+		engramTitle() {
+			return this.$route.params.engramTitle;
+		},
+	},
 };
 </script>

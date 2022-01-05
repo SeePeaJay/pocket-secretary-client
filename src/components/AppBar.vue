@@ -1,6 +1,6 @@
 <template>
 	<nav>
-		<router-link to="/all">
+		<router-link to="/engrams">
 			<img src="../assets/stack-2.svg" alt="tabler stack-2 icon" />
 		</router-link>
 		<a v-if="!isLoggedIn" href="auth/github">

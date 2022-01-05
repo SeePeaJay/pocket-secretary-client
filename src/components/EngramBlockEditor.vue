@@ -3,7 +3,7 @@
 	<CustomTextarea
 		v-show="isOnEditMode"
 		ref="customTextarea"
-		:engramId="engramId"
+		:engram-title="engramTitle"
 		:custom-textarea-index="blockIndex"
 		@exit-edit-mode="exitEditMode"
 		@edit-previous-block="editPreviousBlock"
@@ -23,7 +23,7 @@ export default {
 		CustomTextarea,
 	},
 	props: {
-		engramId: Number,
+		engramTitle: String,
 		blockIndex: Number,
   },
 	emits: ['editNextBlock', 'editPreviousBlock', 'createAndEditNextBlock', 'deleteCurrentBlockAndEditPreviousBlock'],
@@ -34,7 +34,7 @@ export default {
 	},
 	computed: {
 		blockInPlainHtml() {
-			const blockContent = this.$store.state.engrams.find((engram) => engram.id === this.engramId).rootBlocks[this.blockIndex];
+			const blockContent = this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex];
 
 			let cryptarch = new Cryptarch();
 			const html = cryptarch.decrypt(blockContent);
