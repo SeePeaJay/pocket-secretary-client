@@ -24,7 +24,7 @@ export default {
 		},
 	},
 	mounted() {
-		axios.get('http://localhost:3000/engrams').then((response) => {
+		axios.get('http://localhost:3000/engrams', { withCredentials: true }).then((response) => {
 			this.$store.commit('setEngrams', response.data);
 		});
 	},
