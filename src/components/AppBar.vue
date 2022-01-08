@@ -3,7 +3,7 @@
 		<router-link to="/engrams">
 			<img src="../assets/stack-2.svg" alt="tabler stack-2 icon" />
 		</router-link>
-		<a v-if="!isLoggedIn" href="auth/github">
+		<a v-if="!isLoggedIn" href="/auth/github">
 			<img src="../assets/login.svg" alt="tabler login icon" />
 		</a>
 	</nav>

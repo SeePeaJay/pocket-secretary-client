@@ -21,5 +21,7 @@ module.exports = {
 		'space-unary-ops': [0, { 'words': true, 'nonwords': false }],
 		'no-param-reassign': [2, { 'props': false }],
 		'vue/no-multiple-template-root': 0,
+		'arrow-body-style': 0,
+		'prefer-object-spread': 0,
   },
 };

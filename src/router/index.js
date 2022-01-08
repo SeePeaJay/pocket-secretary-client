@@ -15,10 +15,15 @@ const routes = [
 		component: Engrams,
 	},
 	{
-		path: '/engrams/:engramTitle',
-		name: 'engram',
+		path: '/:engramTitle',
+		name: 'Engram',
 		component: Engram,
 	},
+	// {
+	// 	path: '/sample',
+	// 	name: 'Sample',
+	// 	component: Engram,
+	// },
 ];
 
 const router = createRouter({

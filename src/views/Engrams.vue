@@ -4,17 +4,18 @@
 				<h1>Engrams</h1>
 				<table>
 					<tr><th>Title--&nbsp;&nbsp;</th></tr> <!--Name it Title later I think, when the alignment of the header is known-->
-					<tr v-for="(engram, index) in engrams" :key="index">
-						<router-link :to="{ name: 'engram', params: { engramTitle: engram.title }}">{{ engram.title }}</router-link>
+					<tr v-for="engram in engrams" :key="engram.title">
+						<router-link :to="{ name: 'Engram', params: { engramTitle: engram.title }}">{{ engram.title }}</router-link>
 					</tr>
+					<!-- <router-link to="/sample">sample</router-link> -->
+					<!-- <router-link :to="{ name: 'Engram', params: { engramTitle: 'sample' }}">{{ 'sample' }}</router-link> -->
 				</table>
 		</div>
 	</div>
 </template>
 
 <script>
-// import Editor from '../components/Editor.vue';
-import axios from 'axios';
+import { mapActions } from 'vuex';
 
 export default {
   name: 'Engrams',
@@ -23,10 +24,11 @@ export default {
 			return this.$store.state.engrams;
 		},
 	},
-	mounted() {
-		axios.get('http://localhost:3000/engrams', { withCredentials: true }).then((response) => {
-			this.$store.commit('setEngrams', response.data);
-		});
+	methods: {
+		...mapActions(['fetchEngrams']),
+	},
+	created() {
+		this.fetchEngrams();
 	},
 };
 </script>
