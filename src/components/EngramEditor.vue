@@ -20,7 +20,6 @@ import {
 	computed, ref, onBeforeUpdate, nextTick,
 } from 'vue';
 import { useStore } from 'vuex';
-// import axios from 'axios';
 import EngramBlockEditor from './EngramBlockEditor.vue';
 
 export default {
@@ -32,25 +31,10 @@ export default {
 		engramTitle: String,
   },
 	setup(props) {
-		// const currentInstance = getCurrentInstance();
-
 		const store = useStore();
 
-		// console.log(props.engramTitle);
-
 		const engramBlockEditors = ref([]);
-		// console.log(props.engramTitle);
-		console.log(store.state.engrams);
-		const targetCopy = Object.assign({}, store.state.engrams);
-		console.log(store.state.engrams);
-		console.log(targetCopy);
-		// console.log(store.state.engrams.find((engram) => engram.title === props.engramTitle).rootBlocks);
-		// console.log(store.getters.engramRootBlocks(store.state)(props.engramTitle));
-
-		console.log(props.engramTitle);
 		const engramBlocks = computed(() => store.getters.engramRootBlocks(props.engramTitle));
-
-		console.log(engramBlocks.value);
 
 		function editPreviousBlock(currentBlockIndex, contentForPreviousBlock = null) {
 			if (currentBlockIndex > 0) { // make sure current block is not the first one
@@ -124,30 +108,10 @@ export default {
 			return '';
 		}
 
-		// onMounted(async () => {
-		// 	const response = await axios.get(`http://localhost:3000/engrams/${encodeURIComponent(props.engramTitle)}`, { withCredentials: true });
-
-		// 	store.commit('setEngram', response.data);
-
-		// 	console.log(response.data);
-		// });
-
-		// onBeforeMount(async () => {
-    //   const response = await axios.get(`http://localhost:3000/engrams/${encodeURIComponent(props.engramTitle)}`, { withCredentials: true });
-
-		// 	store.commit('setEngram', response.data);
-
-		// 	console.log(response.data);
-		// });
-
 		// make sure to reset the refs before each update
 		onBeforeUpdate(() => {
 			engramBlockEditors.value = [];
 		});
-
-		// 	store.commit('setEngram', response.data);
-		// 	console.log('jijo');
-    // });
 
 		return {
 			engramBlocks,

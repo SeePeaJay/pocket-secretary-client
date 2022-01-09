@@ -4,6 +4,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 import AppBar from './components/AppBar.vue';
 
 export default {
@@ -11,6 +12,25 @@ export default {
   components: {
 		AppBar,
   },
+	methods: {
+		...mapActions(['cancelPreviousRequest']),
+		beforeWindowUnload() {
+			this.cancelPreviousRequest();
+		},
+	},
+	// watch: {
+	// 	$route() {
+	// 		// this.time ++;
+  //     // console.log(`route is changed ${this.time}`);
+	// 		this.cancelAllRequests();
+	// 	},
+	// },
+	created() {
+		window.addEventListener('beforeunload', this.beforeWindowUnload);
+	},
+	beforeUnmount() {
+		window.removeEventListener('beforeunload', this.beforeWindowUnload);
+	},
 };
 </script>
 

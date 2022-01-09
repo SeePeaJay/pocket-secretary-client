@@ -3,32 +3,16 @@ import axios from 'axios';
 import createPersistedState from 'vuex-persistedstate';
 import { RULES } from '../cryptarch/constants';
 
+let abortController = null;
+// let currentTime = Date();
+
 export default createStore({
   state: {
-		engrams: [
-			// {
-			// 	title: 'Title',
-			// 	rootBlocks: [
-			// 		'* Title',
-			// 		'*_1 Level 1 Subtitle',
-			// 		'*_2 Level 2 Subtitle',
-			// 		'*_3 Level 3 Subtitle',
-			// 		'. Unordered list item a\n. Unordered list item b\n. Unordered list item c',
-			// 		'1. Ordered list item 1\n2. Ordered list item 2\n3. Ordered list item 3',
-			// 		'---',
-			// 		'$http://static.wikia.nocookie.net/ninjajojos-bizarre-adventure/images/f/f7/Made_in_Heaven.png/revision/latest/top-crop/width/360/height/450?cb=20210721002513{}',
-			// 		'A paragraph.',
-			// 		'A paragraph with *bold*, /italic/, _underlined_, =highlighted=, and -strikethrough- text.',
-			// 		'A paragraph with nested styles: *bold, /italic, _underlined, =highlighted, and -strikethrough-=_/* text.',
-			// 		'A paragraph with two types of links: autolink ( www.google.com ), and _link alias_(www.google.com).',
-			// 		'A paragraph with an inline image: $http://static.wikia.nocookie.net/ninjajojos-bizarre-adventure/images/f/f7/Made_in_Heaven.png/revision/latest/top-crop/width/360/height/450?cb=20210721002513{}.',
-			// 	],
-			// },
-		],
+		engrams: [],
   },
 	getters: {
 		engramRootBlocks: (state) => (engramTitle) => {
-			console.log(state.engrams);
+			// console.log(state.engrams);
 			// console.log(typeof state.engrams.find((engram) => engram.title === engramTitle).rootBlocks);
 			return state.engrams.find((engram) => engram.title === engramTitle).rootBlocks;
 		},
@@ -63,39 +47,70 @@ export default createStore({
 
 			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks[blockIndex] = blockContent;
 
-			console.log([...new Proxy(state.engrams.find((engram) => engram.title === engramTitle).rootBlocks, [])]);
+			// console.log([...new Proxy(state.engrams.find((engram) => engram.title === engramTitle).rootBlocks, [])]);
 		},
 		deleteEngramBlock(state, { engramTitle, blockIndex }) {
 			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks.splice(blockIndex, 1);
 		},
   },
   actions: {
+		isAbortControllerNull() {
+			return abortController === null;
+		},
+		setAbortController() {
+			abortController = new AbortController();
+			// currentTime = Date();
+			return abortController !== null;
+			// console.log(`abortController status: ${currentTime}`);
+		},
+		cancelPreviousRequest() {
+			if (abortController) {
+				// console.log(`The controller is the following version: ${currentTime}`);
+				abortController.abort();
+			}
+		},
 		async fetchEngrams({ commit, state }) {
-			const response = await axios.get('http://localhost:3000/engrams', { withCredentials: true });
+			try {
+				const response = await axios.get('http://localhost:3000/engrams', { withCredentials: true, signal: abortController.signal });
 
-			if (state.engrams.length === 0) {
-				commit('setEngrams', response.data);
-			} else {
-				const stateEngramTitles = state.engrams.map((stateEngram) => stateEngram.title);
-
-				if (JSON.stringify(stateEngramTitles) !== JSON.stringify(response.data)) {
+				if (state.engrams.length === 0) {
 					commit('setEngrams', response.data);
+				} else {
+					const stateEngramTitles = state.engrams.map((stateEngram) => stateEngram.title);
+
+					if (JSON.stringify(stateEngramTitles) !== JSON.stringify(response.data)) {
+						commit('setEngrams', response.data);
+					}
+				}
+			} catch (error) {
+				if (axios.isCancel(error)) {
+					console.log('Request from Engrams is canceled');
+				} else {
+					console.error(error);
 				}
 			}
 		},
 		async fetchEngram({ commit, state }, engramTitle) {
-			const response = await axios.get(`http://localhost:3000/${encodeURIComponent(engramTitle)}`, { withCredentials: true });
+			try {
+				const response = await axios.get(`http://localhost:3000/engrams/${encodeURIComponent(engramTitle)}`, { withCredentials: true, signal: abortController.signal });
 
-			console.log(response);
-			if (state.engrams.length === 0) {
-				commit('setEngram', response.data);
-			} else {
-				const matchedStateEngramData = state.engrams.find((stateEngramData) => stateEngramData.title === response.data.title);
+				if (state.engrams.length === 0) {
+					commit('setEngram', response.data);
+				} else {
+					const matchedStateEngramData = state.engrams.find((stateEngramData) => stateEngramData.title === response.data.title);
 
-				if (!matchedStateEngramData) {
-					commit('setEngram', response.data);
-				} else if (matchedStateEngramData && JSON.stringify(matchedStateEngramData) !== JSON.stringify(response.data)) {
-					commit('setEngram', response.data);
+					if (!matchedStateEngramData) {
+						commit('setEngram', response.data);
+					} else if (matchedStateEngramData && JSON.stringify(matchedStateEngramData) !== JSON.stringify(response.data)) {
+						commit('setEngram', response.data);
+					}
+				}
+			} catch (error) {
+				if (axios.isCancel(error)) {
+					console.log('Request from indivudal Engram is canceled');
+				} else {
+					// handle error
+					console.error(error);
 				}
 			}
 		},
