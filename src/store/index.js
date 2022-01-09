@@ -1,6 +1,6 @@
 import { createStore } from 'vuex';
-import axios from 'axios';
 import createPersistedState from 'vuex-persistedstate';
+import axios from 'axios';
 import { RULES } from '../cryptarch/constants';
 
 let abortController = null;
@@ -37,9 +37,7 @@ export default createStore({
 			}
 		},
 		createEngramBlock(state, { engramTitle, blockIndex, blockContent }) {
-			// console.log([...new Proxy(state.engrams.find((engram) => engram.title === engramTitle).blocks, [])]);
 			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks.splice(blockIndex, 0, blockContent);
-			// console.log([...new Proxy(state.engrams.find((engram) => engram.title === engramTitle).blocks, [])]);
 		},
 		updateEngramBlock(state, { engramTitle, blockIndex, blockContent }) {
 			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks[blockIndex] = blockContent;
@@ -61,14 +59,14 @@ export default createStore({
 				abortController.abort();
 			}
 		},
-		async fetchUser({ commit }) {
+		async fetchUser({ commit, state }) {
 			try {
 				const response = await axios.get('http://localhost:3000/', { withCredentials: true });
 
-				if (response.data !== 'not authenticated') {
+				if (response.data && !state.username) {
 					commit('setUsername', response.data);
-				} else {
-					console.log('wont set cuz not auth');
+				} else if (!response.data) {
+					console.log('Cannot fetch user; user is not authenticated.');
 				}
 			} catch (error) {
 				console.error(error);
@@ -89,7 +87,7 @@ export default createStore({
 				}
 			} catch (error) {
 				if (axios.isCancel(error)) {
-					console.log('Request from Engrams is canceled');
+					console.log('Request from Engrams is canceled.');
 				} else {
 					console.error(error);
 				}
@@ -112,7 +110,7 @@ export default createStore({
 				}
 			} catch (error) {
 				if (axios.isCancel(error)) {
-					console.log('Request from indivudal Engram is canceled');
+					console.log('Request from indivudal engram is canceled.');
 				} else {
 					// handle error
 					console.error(error);

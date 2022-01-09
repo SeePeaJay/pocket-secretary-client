@@ -33,8 +33,6 @@ router.beforeEach((to, from, next) => {
 	} else {
 		next(false);
 	}
-	// console.log(to);
-	// next();
 });
 
 export default router;

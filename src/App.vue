@@ -41,14 +41,4 @@ export default {
 	display: flex;
 	flex-direction: column;
 }
-
-/* div > ul {
-	display: flex;
-	flex-direction: column;
-} */
-
-/*
-li > ul {
-	display: block;
-} */
 </style>

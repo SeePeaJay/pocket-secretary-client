@@ -17,11 +17,6 @@ import axios from 'axios';
 
 export default {
 	name: 'AppBar',
-	// data() {
-	// 	return {
-	// 		isLoggedIn: false,
-	// 	};
-	// },
 	computed: {
 		isLoggedIn() {
 			return !!this.$store.state.username;
