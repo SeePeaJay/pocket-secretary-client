@@ -7,16 +7,18 @@ let abortController = null;
 
 export default createStore({
   state: {
+		username: '',
 		engrams: [],
   },
 	getters: {
 		engramRootBlocks: (state) => (engramTitle) => {
-			// console.log(state.engrams);
-			// console.log(typeof state.engrams.find((engram) => engram.title === engramTitle).rootBlocks);
 			return state.engrams.find((engram) => engram.title === engramTitle).rootBlocks;
 		},
 	},
   mutations: {
+		setUsername(state, serverUsername) {
+			state.username = serverUsername;
+		},
 		setEngrams(state, serverEngramTitles) { // the content needs to be decoded first, then parsed into rootBlocks.
 			state.engrams = serverEngramTitles.map((serverEngramTitle) => ({
 					title: serverEngramTitle,
@@ -59,6 +61,19 @@ export default createStore({
 				abortController.abort();
 			}
 		},
+		async fetchUser({ commit }) {
+			try {
+				const response = await axios.get('http://localhost:3000/', { withCredentials: true });
+
+				if (response.data !== 'not authenticated') {
+					commit('setUsername', response.data);
+				} else {
+					console.log('wont set cuz not auth');
+				}
+			} catch (error) {
+				console.error(error);
+			}
+		},
 		async fetchEngrams({ commit, state }) {
 			try {
 				const response = await axios.get('http://localhost:3000/engrams', { withCredentials: true, signal: abortController.signal });
@@ -68,7 +83,7 @@ export default createStore({
 				} else {
 					const stateEngramTitles = state.engrams.map((stateEngram) => stateEngram.title);
 
-					if (JSON.stringify(stateEngramTitles) !== JSON.stringify(response.data)) {
+					if (JSON.stringify(stateEngramTitles) !== JSON.stringify(response.data.engramTitles)) {
 						commit('setEngrams', response.data);
 					}
 				}

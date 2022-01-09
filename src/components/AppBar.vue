@@ -6,16 +6,33 @@
 		<a v-if="!isLoggedIn" href="/auth/github">
 			<img src="../assets/login.svg" alt="tabler login icon" />
 		</a>
+		<a v-else @click="logout">
+			<img src="../assets/logout.svg" alt="tabler logout icon" />
+		</a>
 	</nav>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
 	name: 'AppBar',
-	data() {
-		return {
-			isLoggedIn: false,
-		};
+	// data() {
+	// 	return {
+	// 		isLoggedIn: false,
+	// 	};
+	// },
+	computed: {
+		isLoggedIn() {
+			return !!this.$store.state.username;
+		},
+	},
+	methods: {
+		logout() {
+			axios.post('http://localhost:3000/logout', {}, { withCredentials: true });
+			this.$store.state.username = '';
+			this.$router.push('/');
+		},
 	},
 };
 </script>
