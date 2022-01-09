@@ -15,72 +15,28 @@
 <script>
 import { mapActions } from 'vuex';
 
-// function getNewAbortController() {
-// 	return new AbortController();
-// }
-// const abortController = getNewAbortController();
-
 export default {
   name: 'Engrams',
-	// data() {
-	// 	return {
-	// 		abortController: new AbortController(),
-	// 	};
-	// },
   computed: {
-		// abortController() {
-		// 	const abortController = new AbortController();
-		// 	return abortController;
-		// },
 		engrams() {
 			return this.$store.state.engrams;
 		},
 	},
 	methods: {
 		...mapActions(['fetchEngrams', 'cancelPreviousRequest', 'setAbortController']),
-		// beforeWindowUnload() {
-		// 	abortController.abort();
-		// },
 	},
-	// watch: {
-	// 	$route(to, from) {
-	// 		// this.time ++;
-  //     // console.log(`route is changed ${this.time}`);
-	// 		// this.cancelAllRequests();
-	// 		if (from.name === this.$options.name) {
-	// 			console.log(`${from.name}: `);
-	// 			this.cancelAllRequests();
-	// 		}
-	// 		// console.log(this.$options.name);
-	// 		// console.log(from);
-	// 	},
-	// },
 	created() {
 		this.setAbortController().then((value) => {
 			console.log(`At creation of Engrams. And right after setting the abort controller, it should be ${value}`);
 			this.fetchEngrams();
 		});
-		// console.log('At creation of Engrams.');
-		// this.fetchEngrams(abortController);
-		// window.addEventListener('beforeunload', this.beforeWindowUnload);
 	},
-	// beforeUnmount() {
-	// 	if (performance.getEntriesByType('navigation')[0].type === 'reload') {
-	// 		this.cancelAllRequests(this.abortController);
-	// 	}
-	// },
-	beforeRouteLeave(to, from, next) { // this won't execute during refresh
-    // called when the route that renders this component is about to be navigated away from.
+	beforeRouteLeave(to, from, next) { // this won't execute during refresh; called when the route that renders this component is about to be navigated away from.
 		console.log(`on first line of before route leave in ${from.name} ...`);
 		this.cancelPreviousRequest().then(() => {
 			next();
 		});
-		// abortController.abort();
-		// next();
   },
-	// beforeUnmount() {
-	// 	window.removeEventListener('beforeunload', this.beforeWindowUnload);
-	// },
 };
 </script>
 

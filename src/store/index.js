@@ -4,7 +4,6 @@ import createPersistedState from 'vuex-persistedstate';
 import { RULES } from '../cryptarch/constants';
 
 let abortController = null;
-// let currentTime = Date();
 
 export default createStore({
   state: {
@@ -41,31 +40,22 @@ export default createStore({
 			// console.log([...new Proxy(state.engrams.find((engram) => engram.title === engramTitle).blocks, [])]);
 		},
 		updateEngramBlock(state, { engramTitle, blockIndex, blockContent }) {
-			// console.log(`engramTitle at store: ${engramTitle}`);
-			// console.log(`blockIndex at store: ${blockIndex}`);
-			// console.log(`blockContent at store: ${blockContent}`);
-
 			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks[blockIndex] = blockContent;
 
-			// console.log([...new Proxy(state.engrams.find((engram) => engram.title === engramTitle).rootBlocks, [])]);
+			console.log([...new Proxy(state.engrams.find((engram) => engram.title === engramTitle).rootBlocks, [])]);
 		},
 		deleteEngramBlock(state, { engramTitle, blockIndex }) {
 			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks.splice(blockIndex, 1);
 		},
   },
   actions: {
-		isAbortControllerNull() {
-			return abortController === null;
-		},
 		setAbortController() {
 			abortController = new AbortController();
-			// currentTime = Date();
+
 			return abortController !== null;
-			// console.log(`abortController status: ${currentTime}`);
 		},
 		cancelPreviousRequest() {
 			if (abortController) {
-				// console.log(`The controller is the following version: ${currentTime}`);
 				abortController.abort();
 			}
 		},

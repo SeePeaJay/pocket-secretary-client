@@ -18,13 +18,6 @@ export default {
 			this.cancelPreviousRequest();
 		},
 	},
-	// watch: {
-	// 	$route() {
-	// 		// this.time ++;
-  //     // console.log(`route is changed ${this.time}`);
-	// 		this.cancelAllRequests();
-	// 	},
-	// },
 	created() {
 		window.addEventListener('beforeunload', this.beforeWindowUnload);
 	},
