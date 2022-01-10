@@ -31,7 +31,7 @@ router.beforeEach((to, from, next) => {
   if (store.state.username || to.fullPath === '/') {
 		next();
 	} else {
-		next(false);
+		next('/');
 	}
 });
 
