@@ -81,7 +81,7 @@ export default createStore({
 				} else {
 					const stateEngramTitles = state.engrams.map((stateEngram) => stateEngram.title);
 
-					if (JSON.stringify(stateEngramTitles) !== JSON.stringify(response.data.engramTitles)) {
+					if (JSON.stringify(stateEngramTitles) !== JSON.stringify(response.data)) {
 						commit('setEngrams', response.data);
 					}
 				}
