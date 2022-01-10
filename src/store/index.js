@@ -12,7 +12,11 @@ export default createStore({
   },
 	getters: {
 		engramRootBlocks: (state) => (engramTitle) => {
-			return state.engrams.find((engram) => engram.title === engramTitle).rootBlocks;
+			const foundEngram = state.engrams.find((engram) => engram.title === engramTitle);
+			if (foundEngram) {
+				return state.engrams.find((engram) => engram.title === engramTitle).rootBlocks;
+			}
+			return [];
 		},
 	},
   mutations: {
