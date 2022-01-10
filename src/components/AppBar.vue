@@ -52,6 +52,7 @@ nav > * {
 	height: 24px;
 	filter: invert(67%) sepia(0%) saturate(261%) hue-rotate(157deg) brightness(88%) contrast(79%); /* = #919191 */
 	margin: 8px;
+	cursor: pointer;
 }
 
 nav > *:hover {
