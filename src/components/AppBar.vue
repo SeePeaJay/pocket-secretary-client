@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex';
 import axios from 'axios';
 
 export default {
@@ -23,10 +24,16 @@ export default {
 		},
 	},
 	methods: {
-		logout() {
-			axios.post('http://localhost:3000/logout', {}, { withCredentials: true });
-			this.$store.state.username = '';
-			this.$router.push('/');
+		...mapMutations(['setUsername', 'setEngrams']),
+		async logout() {
+			try {
+				await axios.post('http://localhost:3000/logout', {}, { withCredentials: true });
+				this.setUsername('');
+				this.setEngrams([]);
+				this.$router.push('/');
+			} catch (error) {
+				console.error(error);
+			}
 		},
 	},
 };
