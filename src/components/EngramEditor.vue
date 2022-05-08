@@ -9,7 +9,7 @@
 				@edit-previous-block="editPreviousBlock"
 				@edit-next-block="editNextBlock"
 				@create-and-edit-next-block="createAndEditNextBlock"
-				@delete-current-block-and-edit-previous-block="deleteCurrentBlockAndEditPreviousBlock"
+				@delete-current-and-edit-previous-block="deleteCurrentAndEditPreviousBlock"
 			/>
 		</div>
   </div>
@@ -37,46 +37,49 @@ export default {
 		const engramBlocks = computed(() => store.getters.engramRootBlocks(props.engramTitle));
 
 		function editPreviousBlock(currentBlockIndex, contentForPreviousBlock = null) {
-			if (currentBlockIndex > 0) { // make sure current block is not the first one
-				const previousBlockIndex = currentBlockIndex - 1;
+			// if (currentBlockIndex > 0) { // make sure current block is not the first one
+			// }
+			const previousBlockIndex = currentBlockIndex - 1;
 
-				if (contentForPreviousBlock !== null) { // comes from deleteCurrentBlockAndEditPreviousBlock
-					const payload = {
-						engramTitle: props.engramTitle,
-						blockIndex: previousBlockIndex,
-						blockContent: engramBlocks.value[previousBlockIndex] + contentForPreviousBlock,
-					};
+			if (contentForPreviousBlock !== null) { // satisfied if from deleteCurrentAndEditPreviousBlock
+				const payload = {
+					engramTitle: props.engramTitle,
+					blockIndex: previousBlockIndex,
+					blockContent: engramBlocks.value[previousBlockIndex] + contentForPreviousBlock,
+				};
 
-					store.commit('updateEngramBlock', payload);
+				store.commit('SET_ENGRAM_BLOCK', payload);
+				store.dispatch('putEngram', { engramTitle: props.engramTitle }); // this should persist
 
-					nextTick(() => {
-						engramBlockEditors.value[previousBlockIndex].enterEditMode();
-					});
-				} else {
+				nextTick(() => {
 					engramBlockEditors.value[previousBlockIndex].enterEditMode();
-				}
+				});
+			} else {
+				engramBlockEditors.value[previousBlockIndex].enterEditMode();
 			}
 		}
 
 		function editNextBlock(currentBlockIndex, contentForNextBlock = null) {
-			if (currentBlockIndex < engramBlocks.value.length - 1) { // make sure current block is not the last one, as 'next block' would not exist
-				const nextBlockIndex = currentBlockIndex + 1;
+			// if (currentBlockIndex < engramBlocks.value.length - 1) { // make sure current block is not the last one, as 'next block' would not exist
+			// }
+			const nextBlockIndex = currentBlockIndex + 1;
 
-				if (contentForNextBlock !== null) { // comes from createAndEditNextBlock
-					const payload = {
-						engramTitle: props.engramTitle,
-						blockIndex: nextBlockIndex,
-						blockContent: contentForNextBlock,
-					};
+			if (contentForNextBlock !== null) { // satisfied if from createAndEditNextBlock
+				const payload = {
+					engramTitle: props.engramTitle,
+					blockIndex: nextBlockIndex,
+					blockContent: contentForNextBlock,
+				};
 
-					store.commit('updateEngramBlock', payload);
+				store.commit('SET_ENGRAM_BLOCK', payload);
+				store.dispatch('putEngram', { engramTitle: props.engramTitle }); // this should persist
 
-					nextTick(() => {
-						engramBlockEditors.value[nextBlockIndex].enterEditMode();
-					});
-				} else {
+				nextTick(() => {
 					engramBlockEditors.value[nextBlockIndex].enterEditMode();
-				}
+				});
+			} else {
+				console.log('isnt this called?');
+				engramBlockEditors.value[nextBlockIndex].enterEditMode();
 			}
 		}
 
@@ -87,20 +90,20 @@ export default {
 				blockContent: '',
 			};
 
-			store.commit('createEngramBlock', payload);
+			store.commit('ADD_ENGRAM_BLOCK', payload);
 
 			nextTick(() => {
 				editNextBlock(currentBlockIndex, contentForNextBlock);
 			});
 		}
 
-		function deleteCurrentBlockAndEditPreviousBlock(currentBlockIndex, contentForPreviousBlock) {
+		function deleteCurrentAndEditPreviousBlock(currentBlockIndex, contentForPreviousBlock) {
 			const payload = {
 				engramTitle: props.engramTitle,
 				blockIndex: currentBlockIndex,
 			};
 
-			store.commit('deleteEngramBlock', payload);
+			store.commit('REMOVE_ENGRAM_BLOCK', payload);
 
 			nextTick(() => {
 				editPreviousBlock(currentBlockIndex, contentForPreviousBlock);
@@ -119,7 +122,7 @@ export default {
 			editPreviousBlock,
 			editNextBlock,
 			createAndEditNextBlock,
-			deleteCurrentBlockAndEditPreviousBlock,
+			deleteCurrentAndEditPreviousBlock,
 		};
 	},
 };

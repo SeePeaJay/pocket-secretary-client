@@ -5,11 +5,12 @@
 		ref="customTextarea"
 		:engram-title="engramTitle"
 		:custom-textarea-index="blockIndex"
+		:exit-edit-by-keystroke="exitEditByKeystroke"
 		@exit-edit-mode="exitEditMode"
 		@edit-previous-block="editPreviousBlock"
 		@edit-next-block="editNextBlock"
 		@create-and-edit-next-block="createAndEditNextBlock"
-		@delete-current-block-and-edit-previous-block="deleteCurrentBlockAndEditPreviousBlock"
+		@delete-current-and-edit-previous-block="deleteCurrentAndEditPreviousBlock"
 	/>
 </template>
 
@@ -26,10 +27,11 @@ export default {
 		engramTitle: String,
 		blockIndex: Number,
   },
-	emits: ['editNextBlock', 'editPreviousBlock', 'createAndEditNextBlock', 'deleteCurrentBlockAndEditPreviousBlock'],
+	emits: ['editNextBlock', 'editPreviousBlock', 'createAndEditNextBlock', 'deleteCurrentAndEditPreviousBlock'],
 	data() {
 		return {
 			isOnEditMode: false,
+			exitEditByKeystroke: false,
 		};
 	},
 	computed: {
@@ -46,30 +48,28 @@ export default {
 	methods: {
 		enterEditMode() {
 			this.isOnEditMode = true;
+			this.exitEditByKeystroke = false;
 
 			this.$nextTick(() => { // wait for the textarea to show up, then make the text area appear AND focus on it
-				this.$refs.customTextarea.resizeAndFocus();
+				this.$refs.customTextarea.resizeAndFocus(); // triggers onBlur
 			});
 		},
-		exitEditMode() {
-			setTimeout(() => { this.isOnEditMode = false; }, 100); // a timeout is necessary to be able to consistently edit other blocks BEFORE re-rendering the previously editted block; nextTick cannot achieve this I think
-			// 0 to eliminate variables now
+		exitEditMode() { // convert textarea back to div
+			setTimeout(() => { this.isOnEditMode = false; }, 100); // a timeout is necessary to be able to consistently edit other blocks BEFORE re-rendering the previously editted block; nextTick was not able to achieve this
 		},
 		editPreviousBlock() {
-			this.exitEditMode();
 			this.$emit('editPreviousBlock', this.blockIndex);
 		},
 		editNextBlock() {
-			this.exitEditMode();
 			this.$emit('editNextBlock', this.blockIndex);
 		},
 		createAndEditNextBlock(contentForNextBlock) {
-			this.exitEditMode();
+			this.exitEditByKeystroke = true;
 			this.$emit('createAndEditNextBlock', this.blockIndex, contentForNextBlock);
 		},
-		deleteCurrentBlockAndEditPreviousBlock(contentForPreviousBlock) {
-			this.exitEditMode();
-			this.$emit('deleteCurrentBlockAndEditPreviousBlock', this.blockIndex, contentForPreviousBlock);
+		deleteCurrentAndEditPreviousBlock(contentForPreviousBlock) {
+			this.exitEditByKeystroke = true;
+			this.$emit('deleteCurrentAndEditPreviousBlock', this.blockIndex, contentForPreviousBlock);
 		},
 	},
 };

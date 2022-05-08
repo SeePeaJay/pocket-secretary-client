@@ -27,7 +27,7 @@ export default {
 
 		// this.setAbortController().then((value) => {
 		// 	console.log(`At creation of Engrams. And right after setting the abort controller, it should be ${value}`);
-		// 	this.fetchEngrams();
+		// 	this.fetchEngramList();
 		// });
 	},
 };

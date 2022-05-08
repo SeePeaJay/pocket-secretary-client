@@ -24,12 +24,12 @@ export default {
 		},
 	},
 	methods: {
-		...mapMutations(['setUsername', 'setEngrams']),
+		...mapMutations(['SET_USERNAME', 'SET_ENGRAMS']),
 		async logout() {
 			try {
 				await axios.post('http://localhost:3000/logout', {}, { withCredentials: true });
-				this.setUsername('');
-				this.setEngrams([]);
+				this.SET_USERNAME('');
+				this.SET_ENGRAMS([]);
 				this.$router.push('/');
 			} catch (error) {
 				console.error(error);

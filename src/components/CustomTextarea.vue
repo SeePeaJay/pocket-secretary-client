@@ -3,13 +3,13 @@
     :value="textareaContent"
     ref="textarea"
     rows="1"
-		@blur="textareaContent = $event.target.value; $emit('exitEditMode');"
+		@blur="onBlurHandler($event.target.value);"
     @focus="resizeTextarea"
     @keyup="resizeTextarea"
 		@keydown.up="isAtStartOfTexarea() && !isTheFirstTextarea() && $emit('editPreviousBlock')"
 		@keydown.down="isAtEndOfTexarea() && !isTheLastTextarea() && $emit('editNextBlock')"
 		@keydown.enter="shouldEnterKeyCreateAndEditNextBlock($event) && createAndEditNextBlock()"
-		@keydown.delete="shouldBackspaceKeyDeleteCurrentBlockAndEditPreviousBlock($event) && deleteCurrentBlockAndEditPreviousBlock()"
+		@keydown.delete="shouldBackspaceKeyDeleteCurrentAndEditPreviousBlock($event) && deleteCurrentAndEditPreviousBlock()"
   >
   </textarea>
 </template>
@@ -20,8 +20,9 @@ export default {
 	props: {
 		engramTitle: String,
 		customTextareaIndex: Number,
+		exitEditByKeystroke: Boolean,
 	},
-	emits: ['exitEditMode', 'editPreviousBlock', 'editNextBlock', 'createAndEditNextBlock', 'deleteCurrentBlockAndEditPreviousBlock'],
+	emits: ['exitEditMode', 'editPreviousBlock', 'editNextBlock', 'createAndEditNextBlock', 'deleteCurrentAndEditPreviousBlock'],
 	computed: {
 		textareaContent: {
 			get() {
@@ -34,7 +35,8 @@ export default {
 					blockContent: value,
 				};
 
-				this.$store.commit('updateEngramBlock', payload);
+				this.$store.commit('SET_ENGRAM_BLOCK', payload);
+				// this.$store.dispatch('putEngram', payload); // shouldn't be here yet for consistency?
 			},
 		},
 	},
@@ -42,6 +44,25 @@ export default {
 		this.resizeAndFocus();
 	},
 	methods: {
+		msg(object) {
+			console.log(object);
+		},
+		onBlurHandler(eventTargetValue) {
+			this.$emit('exitEditMode'); // for all? delete shouldn't lead to this as element is already del
+
+			if (!this.exitEditByKeystroke && this.isCurrentEngramBlockUpdated(eventTargetValue)) {
+				this.textareaContent = eventTargetValue; // we shouldn't be calling this line if we came from enter
+
+				this.$store.dispatch('putEngram', { engramTitle: this.engramTitle });
+				// this.msg('am i blurring?');
+			}
+			// if (this.isCurrentEngramBlockUpdated(eventTargetValue)) {
+			// 	this.textareaContent = eventTargetValue; // this seems right, no need to commit if no change.
+			// 	// this.$store.dispatch('putEngram', this.engramTitle);
+			// }
+
+			// the problem now is, we have to dispatch here if we are just clicking and blurring the textarea, while avoiding from up, down, and enter.
+		},
 		resizeAndFocus() {
 			this.resizeTextarea();
 			this.$refs.textarea.focus();
@@ -50,6 +71,9 @@ export default {
 			const { textarea } = this.$refs;
 			textarea.style.height = 'auto';
 			textarea.style.height = `${textarea.scrollHeight}px`;
+		},
+		isCurrentEngramBlockUpdated(newBlockContent) {
+			return newBlockContent !== this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.customTextareaIndex];
 		},
 		isAtStartOfTexarea() {
 			if (this.$refs.textarea.selectionEnd === 0) { // selectionEnd because selected text can end at the start of textarea and if you want to remove said text you shouldn't remove the block
@@ -85,7 +109,7 @@ export default {
 			this.textareaContent = this.$refs.textarea.value.substring(0, this.$refs.textarea.selectionStart);
 			this.$emit('createAndEditNextBlock', contentForNextBlock);
 		},
-		shouldBackspaceKeyDeleteCurrentBlockAndEditPreviousBlock($keydownEvent) {
+		shouldBackspaceKeyDeleteCurrentAndEditPreviousBlock($keydownEvent) {
 			if ($keydownEvent.keyCode === 8 && this.isAtStartOfTexarea() && !this.isTheFirstTextarea()) { // make sure it's actually backspace and not delete key
 				$keydownEvent.preventDefault();
 
@@ -94,10 +118,10 @@ export default {
 
 			return false;
 		},
-		deleteCurrentBlockAndEditPreviousBlock() {
+		deleteCurrentAndEditPreviousBlock() {
 			const contentForPreviousBlock = this.$refs.textarea.value; // this.textareaContent is not used here because it may be outdated compared to the actual textarea value at this point (textareaContent does not track any changes to the textarea value before this function is called)
 			this.textareaContent = ''; // look better?
-			this.$emit('deleteCurrentBlockAndEditPreviousBlock', contentForPreviousBlock);
+			this.$emit('deleteCurrentAndEditPreviousBlock', contentForPreviousBlock);
 		},
 	},
 };
