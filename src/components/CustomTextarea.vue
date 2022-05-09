@@ -9,7 +9,7 @@
 		@keydown.up="isAtStartOfTexarea() && !isTheFirstTextarea() && $emit('editPreviousBlock')"
 		@keydown.down="isAtEndOfTexarea() && !isTheLastTextarea() && $emit('editNextBlock')"
 		@keydown.enter="shouldEnterKeyCreateAndEditNextBlock($event) && createAndEditNextBlock()"
-		@keydown.delete="shouldBackspaceKeyDeleteCurrentAndEditPreviousBlock($event) && deleteCurrentAndEditPreviousBlock()"
+		@keydown.delete="shouldDeleteKeyDeleteCurrentAndEditPreviousBlock($event) && deleteCurrentAndEditPreviousBlock()"
   >
   </textarea>
 </template>
@@ -20,7 +20,7 @@ export default {
 	props: {
 		engramTitle: String,
 		customTextareaIndex: Number,
-		exitEditByKeystroke: Boolean,
+		isExitingEditModeByEnterOrDeleteKey: Boolean,
 	},
 	emits: ['exitEditMode', 'editPreviousBlock', 'editNextBlock', 'createAndEditNextBlock', 'deleteCurrentAndEditPreviousBlock'],
 	computed: {
@@ -36,7 +36,6 @@ export default {
 				};
 
 				this.$store.commit('SET_ENGRAM_BLOCK', payload);
-				// this.$store.dispatch('putEngram', payload); // shouldn't be here yet for consistency?
 			},
 		},
 	},
@@ -44,24 +43,17 @@ export default {
 		this.resizeAndFocus();
 	},
 	methods: {
-		msg(object) {
-			console.log(object);
-		},
 		onBlurHandler(eventTargetValue) {
-			this.$emit('exitEditMode'); // for all? delete shouldn't lead to this as element is already del
+			this.$emit('exitEditMode');
 
-			if (!this.exitEditByKeystroke && this.isCurrentEngramBlockUpdated(eventTargetValue)) {
-				this.textareaContent = eventTargetValue; // we shouldn't be calling this line if we came from enter
+			if (!this.isExitingEditModeByEnterOrDeleteKey && this.isCurrentEngramBlockUpdated(eventTargetValue)) { // shouldn't be satisfied if exit by enter key
+				this.textareaContent = eventTargetValue;
 
-				this.$store.dispatch('putEngram', { engramTitle: this.engramTitle });
-				// this.msg('am i blurring?');
+				this.$store.dispatch('putEngram', this.engramTitle);
 			}
-			// if (this.isCurrentEngramBlockUpdated(eventTargetValue)) {
-			// 	this.textareaContent = eventTargetValue; // this seems right, no need to commit if no change.
-			// 	// this.$store.dispatch('putEngram', this.engramTitle);
-			// }
-
-			// the problem now is, we have to dispatch here if we are just clicking and blurring the textarea, while avoiding from up, down, and enter.
+		},
+		isCurrentEngramBlockUpdated(newBlockContent) {
+			return newBlockContent !== this.textareaContent;
 		},
 		resizeAndFocus() {
 			this.resizeTextarea();
@@ -72,11 +64,8 @@ export default {
 			textarea.style.height = 'auto';
 			textarea.style.height = `${textarea.scrollHeight}px`;
 		},
-		isCurrentEngramBlockUpdated(newBlockContent) {
-			return newBlockContent !== this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.customTextareaIndex];
-		},
 		isAtStartOfTexarea() {
-			if (this.$refs.textarea.selectionEnd === 0) { // selectionEnd because selected text can end at the start of textarea and if you want to remove said text you shouldn't remove the block
+			if (this.$refs.textarea.selectionEnd === 0) { // selectionEnd because selected text can end at start of textarea and if you want to remove said text you shouldn't remove the block
 				return true;
 			}
 			return false;
@@ -109,7 +98,7 @@ export default {
 			this.textareaContent = this.$refs.textarea.value.substring(0, this.$refs.textarea.selectionStart);
 			this.$emit('createAndEditNextBlock', contentForNextBlock);
 		},
-		shouldBackspaceKeyDeleteCurrentAndEditPreviousBlock($keydownEvent) {
+		shouldDeleteKeyDeleteCurrentAndEditPreviousBlock($keydownEvent) {
 			if ($keydownEvent.keyCode === 8 && this.isAtStartOfTexarea() && !this.isTheFirstTextarea()) { // make sure it's actually backspace and not delete key
 				$keydownEvent.preventDefault();
 

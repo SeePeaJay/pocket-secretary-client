@@ -120,15 +120,11 @@ export default createStore({
 				}
 			}
 		},
-		async putEngram({ state }, { engramTitle }) {
+		async putEngram({ state }, engramTitle) {
 			try {
-				// const payload = { engramTitle, blockIndex, blockContent };
-				// commit('SET_ENGRAM_BLOCK', payload);
-				console.log(state.engrams);
-				console.log(`engramTitle: ${engramTitle}`);
-
 				const matchedEngram = state.engrams.find((engram) => engram.title === engramTitle);
 				const engramContent = matchedEngram.rootBlocks.join('\n\n');
+
 				await axios.put('http://localhost:3000/engram',
 					{ engramTitle, engramContent },
 					{ withCredentials: true, signal: abortController.signal });

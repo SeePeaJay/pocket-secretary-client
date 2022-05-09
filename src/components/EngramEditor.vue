@@ -37,8 +37,6 @@ export default {
 		const engramBlocks = computed(() => store.getters.engramRootBlocks(props.engramTitle));
 
 		function editPreviousBlock(currentBlockIndex, contentForPreviousBlock = null) {
-			// if (currentBlockIndex > 0) { // make sure current block is not the first one
-			// }
 			const previousBlockIndex = currentBlockIndex - 1;
 
 			if (contentForPreviousBlock !== null) { // satisfied if from deleteCurrentAndEditPreviousBlock
@@ -49,7 +47,7 @@ export default {
 				};
 
 				store.commit('SET_ENGRAM_BLOCK', payload);
-				store.dispatch('putEngram', { engramTitle: props.engramTitle }); // this should persist
+				store.dispatch('putEngram', props.engramTitle);
 
 				nextTick(() => {
 					engramBlockEditors.value[previousBlockIndex].enterEditMode();
@@ -60,8 +58,6 @@ export default {
 		}
 
 		function editNextBlock(currentBlockIndex, contentForNextBlock = null) {
-			// if (currentBlockIndex < engramBlocks.value.length - 1) { // make sure current block is not the last one, as 'next block' would not exist
-			// }
 			const nextBlockIndex = currentBlockIndex + 1;
 
 			if (contentForNextBlock !== null) { // satisfied if from createAndEditNextBlock
@@ -72,13 +68,12 @@ export default {
 				};
 
 				store.commit('SET_ENGRAM_BLOCK', payload);
-				store.dispatch('putEngram', { engramTitle: props.engramTitle }); // this should persist
+				store.dispatch('putEngram', props.engramTitle);
 
 				nextTick(() => {
 					engramBlockEditors.value[nextBlockIndex].enterEditMode();
 				});
 			} else {
-				console.log('isnt this called?');
 				engramBlockEditors.value[nextBlockIndex].enterEditMode();
 			}
 		}

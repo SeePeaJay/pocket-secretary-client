@@ -5,7 +5,7 @@
 		ref="customTextarea"
 		:engram-title="engramTitle"
 		:custom-textarea-index="blockIndex"
-		:exit-edit-by-keystroke="exitEditByKeystroke"
+		:is-exiting-edit-mode-by-enter-or-delete-key="isExitingEditModeByEnterOrDeleteKey"
 		@exit-edit-mode="exitEditMode"
 		@edit-previous-block="editPreviousBlock"
 		@edit-next-block="editNextBlock"
@@ -31,7 +31,7 @@ export default {
 	data() {
 		return {
 			isOnEditMode: false,
-			exitEditByKeystroke: false,
+			isExitingEditModeByEnterOrDeleteKey: false,
 		};
 	},
 	computed: {
@@ -48,7 +48,7 @@ export default {
 	methods: {
 		enterEditMode() {
 			this.isOnEditMode = true;
-			this.exitEditByKeystroke = false;
+			this.isExitingEditModeByEnterOrDeleteKey = false;
 
 			this.$nextTick(() => { // wait for the textarea to show up, then make the text area appear AND focus on it
 				this.$refs.customTextarea.resizeAndFocus(); // triggers onBlur
@@ -64,11 +64,11 @@ export default {
 			this.$emit('editNextBlock', this.blockIndex);
 		},
 		createAndEditNextBlock(contentForNextBlock) {
-			this.exitEditByKeystroke = true;
+			this.isExitingEditModeByEnterOrDeleteKey = true;
 			this.$emit('createAndEditNextBlock', this.blockIndex, contentForNextBlock);
 		},
 		deleteCurrentAndEditPreviousBlock(contentForPreviousBlock) {
-			this.exitEditByKeystroke = true;
+			this.isExitingEditModeByEnterOrDeleteKey = true;
 			this.$emit('deleteCurrentAndEditPreviousBlock', this.blockIndex, contentForPreviousBlock);
 		},
 	},
