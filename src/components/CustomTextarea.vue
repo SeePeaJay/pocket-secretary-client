@@ -1,15 +1,15 @@
 <template>
 	<textarea
-    :value="textareaContent"
+    v-model="textareaContent"
     ref="textarea"
     rows="1"
-		@blur="onBlurHandler($event.target.value);"
+		@blur="onBlurHandler();"
     @focus="resizeTextarea"
     @keyup="resizeTextarea"
 		@keydown.up="isAtStartOfTexarea() && !isTheFirstTextarea() && $emit('editPreviousBlock')"
 		@keydown.down="isAtEndOfTexarea() && !isTheLastTextarea() && $emit('editNextBlock')"
 		@keydown.enter="shouldEnterKeyCreateAndEditNextBlock($event) && createAndEditNextBlock()"
-		@keydown.delete="shouldDeleteKeyDeleteCurrentAndEditPreviousBlock($event) && deleteCurrentAndEditPreviousBlock()"
+		@keydown.delete="shouldDeleteKeyDeleteCurrentAndEditPreviousBlock($event) && deleteCurrentAndEditPreviousBlock();"
   >
   </textarea>
 </template>
@@ -39,21 +39,30 @@ export default {
 			},
 		},
 	},
+	data() {
+		return {
+			textareaContentOnFocus: '',
+		};
+	},
 	mounted() {
 		this.resizeAndFocus();
+		this.textareaContentOnFocus = this.textareaContent;
 	},
 	methods: {
-		onBlurHandler(eventTargetValue) {
+		msg(obj) {
+			console.log(obj);
+		},
+		onBlurHandler() {
 			this.$emit('exitEditMode');
 
-			if (!this.isExitingEditModeByEnterOrDeleteKey && this.isCurrentEngramBlockUpdated(eventTargetValue)) { // shouldn't be satisfied if exit by enter key
-				this.textareaContent = eventTargetValue;
+			if (!this.isExitingEditModeByEnterOrDeleteKey && this.isCurrentEngramBlockUpdated()) { // shouldn't be satisfied if exit by enter key
+				this.textareaContentOnFocus = this.textareaContent;
 
 				this.$store.dispatch('putEngram', this.engramTitle);
 			}
 		},
-		isCurrentEngramBlockUpdated(newBlockContent) {
-			return newBlockContent !== this.textareaContent;
+		isCurrentEngramBlockUpdated() {
+			return this.textareaContent !== this.textareaContentOnFocus;
 		},
 		resizeAndFocus() {
 			this.resizeTextarea();

@@ -11,7 +11,7 @@ class Lexer {
 		const rootBlocks = engram.split(RULES.rootBlockSeparator);
 		this.blocksAndSeparators.push(...this.getBlocksAndSeparators(rootBlocks)); // "flatten" lists into the array
 
-		console.log([...this.blocksAndSeparators]);
+		// console.log([...this.blocksAndSeparators]);
 	}
 
 	getBlocksAndSeparators(rootBlocks) {
