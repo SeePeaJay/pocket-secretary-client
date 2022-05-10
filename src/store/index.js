@@ -3,12 +3,14 @@ import createPersistedState from 'vuex-persistedstate';
 import axios from 'axios';
 import { RULES } from '../cryptarch/constants';
 
-let abortController = null;
+let getAbortController = null;
+// let putAbortController = null;
 
 export default createStore({
   state: {
 		username: '',
 		engrams: [],
+		lastCommittedEngramData: {},
   },
 	getters: {
 		engramRootBlocks: (state) => (engramTitle) => {
@@ -32,13 +34,18 @@ export default createStore({
 			console.log(state.engrams);
 		},
 		SET_ENGRAM(state, serverEngramData) {
-			const matchedStateEngramData = state.engrams.find((stateEngramData) => stateEngramData.title === serverEngramData.title);
+			const matchingStateEngramData = state.engrams.find((stateEngramData) => stateEngramData.title === serverEngramData.title);
 
-			if (!matchedStateEngramData) {
+			if (!matchingStateEngramData) {
 				state.engrams.push(serverEngramData);
-			} else if (matchedStateEngramData && JSON.stringify(matchedStateEngramData) !== JSON.stringify(serverEngramData)) {
-				matchedStateEngramData.rootBlocks = Buffer.from(serverEngramData.content, 'base64').toString('ascii').split(RULES.rootBlockSeparator);
+			} else if (matchingStateEngramData && JSON.stringify(matchingStateEngramData) !== JSON.stringify(serverEngramData)) {
+				matchingStateEngramData.rootBlocks = Buffer.from(serverEngramData.content, 'base64').toString('ascii').split(RULES.rootBlockSeparator);
 			}
+		},
+		SET_LAST_COMMITTED_ENGRAM_DATA(state, engramTitle) {
+			const matchingEngramData = state.engrams.find((stateEngramData) => stateEngramData.title === engramTitle);
+
+			state.lastCommittedEngramData = JSON.parse(JSON.stringify(matchingEngramData));
 		},
 		SET_ENGRAM_BLOCK(state, { engramTitle, blockIndex, blockContent }) {
 			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks[blockIndex] = blockContent;
@@ -54,15 +61,21 @@ export default createStore({
   },
   actions: {
 		setAbortController() {
-			abortController = new AbortController();
+			getAbortController = new AbortController();
+			// putAbortController = new AbortController();
 
-			return abortController !== null;
+			return getAbortController !== null;
 		},
-		cancelPreviousRequest() {
-			if (abortController) {
-				abortController.abort();
+		cancelPreviousGetRequest() {
+			if (getAbortController) {
+				getAbortController.abort();
 			}
 		},
+		// cancelPreviousPutRequest() {
+		// 	if (putAbortController) {
+		// 		putAbortController.abort();
+		// 	}
+		// },
 		async fetchUser({ commit, state }) {
 			try {
 				const response = await axios.get('http://localhost:3000/', { withCredentials: true });
@@ -78,7 +91,7 @@ export default createStore({
 		},
 		async fetchEngramList({ commit, state }) {
 			try {
-				const response = await axios.get('http://localhost:3000/engrams', { withCredentials: true, signal: abortController.signal });
+				const response = await axios.get('http://localhost:3000/engrams', { withCredentials: true, signal: getAbortController.signal });
 
 				if (state.engrams.length === 0) {
 					commit('SET_ENGRAMS', response.data);
@@ -99,16 +112,16 @@ export default createStore({
 		},
 		async fetchEngram({ commit, state }, engramTitle) {
 			try {
-				const response = await axios.get(`http://localhost:3000/engrams/${encodeURIComponent(engramTitle)}`, { withCredentials: true, signal: abortController.signal });
+				const response = await axios.get(`http://localhost:3000/engrams/${encodeURIComponent(engramTitle)}`, { withCredentials: true, signal: getAbortController.signal });
 
 				if (state.engrams.length === 0) {
 					commit('SET_ENGRAM', response.data);
 				} else {
-					const matchedStateEngramData = state.engrams.find((stateEngramData) => stateEngramData.title === response.data.title);
+					const matchingStateEngramData = state.engrams.find((stateEngramData) => stateEngramData.title === response.data.title);
 
-					if (!matchedStateEngramData) {
+					if (!matchingStateEngramData) {
 						commit('SET_ENGRAM', response.data);
-					} else if (matchedStateEngramData && JSON.stringify(matchedStateEngramData) !== JSON.stringify(response.data)) {
+					} else if (matchingStateEngramData && JSON.stringify(matchingStateEngramData) !== JSON.stringify(response.data)) {
 						commit('SET_ENGRAM', response.data);
 					}
 				}
@@ -121,13 +134,16 @@ export default createStore({
 			}
 		},
 		async putEngram({ state }, engramTitle) {
+			// dispatch('cancelPreviousPutRequest');
+			// putAbortController = new AbortController();
+
 			try {
 				const matchedEngram = state.engrams.find((engram) => engram.title === engramTitle);
 				const engramContent = matchedEngram.rootBlocks.join('\n\n');
 
 				await axios.put('http://localhost:3000/engram',
 					{ engramTitle, engramContent },
-					{ withCredentials: true, signal: abortController.signal });
+					{ withCredentials: true, signal: getAbortController.signal });
 			} catch (error) {
 				if (axios.isCancel(error)) {
 					console.log('Request from indivudal engram is canceled.');
