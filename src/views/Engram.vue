@@ -18,7 +18,7 @@ export default {
 	},
 	methods: {
 		...mapMutations(['SET_LAST_COMMITTED_ENGRAM_DATA']),
-		...mapActions(['setAbortController', 'fetchEngram', 'cancelPreviousGetRequest', 'cancelPreviousPutRequest']),
+		...mapActions(['setAbortController', 'fetchEngram', 'cancelPreviousRequest']),
 	},
 	created() {
 		this.setAbortController().then((value) => {
@@ -29,10 +29,8 @@ export default {
 	},
 	beforeRouteLeave(to, from, next) { // this won't execute during refresh called when the route that renders this component is about to be navigated away from.
 		console.log(`On first line of before route leave in ${from.name} ...`);
-		this.cancelPreviousGetRequest().then(() => {
+		this.cancelPreviousRequest().then(() => {
 			next();
-			// this.cancelPreviousPutRequest().then(() => {
-			// });
 		});
   },
 };

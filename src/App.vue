@@ -13,10 +13,9 @@ export default {
 		AppBar,
   },
 	methods: {
-		...mapActions(['cancelPreviousGetRequest', 'cancelPreviousPutRequest']),
+		...mapActions(['cancelPreviousRequest']),
 		beforeWindowUnload() {
-			this.cancelPreviousGetRequest();
-			// this.cancelPreviousPutRequest();
+			this.cancelPreviousRequest();
 		},
 	},
 	created() {

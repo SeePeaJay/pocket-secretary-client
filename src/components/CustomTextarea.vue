@@ -41,7 +41,6 @@ export default {
 	},
 	mounted() {
 		this.resizeAndFocus();
-		console.log(`textareaContentMounted: ${this.textareaContent}`);
 	},
 	methods: {
 		msg(obj) {
@@ -51,8 +50,7 @@ export default {
 			this.$emit('exitEditMode');
 
 			if (!this.isExitingEditModeByEnterOrDeleteKey && this.isCurrentEngramBlockUpdated()) { // shouldn't be satisfied if exit by enter key
-				this.$store.dispatch('putEngram', this.engramTitle);
-				this.$store.commit('SET_LAST_COMMITTED_ENGRAM_DATA', this.engramTitle);
+				this.$store.dispatch('setPutEngramRequestAndLastCommittedEngramData', this.engramTitle);
 			}
 		},
 		isCurrentEngramBlockUpdated() {

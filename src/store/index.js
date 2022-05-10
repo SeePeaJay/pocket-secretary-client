@@ -3,8 +3,8 @@ import createPersistedState from 'vuex-persistedstate';
 import axios from 'axios';
 import { RULES } from '../cryptarch/constants';
 
-let getAbortController = null;
-// let putAbortController = null;
+let abortController = null;
+let putEngramRequest;
 
 export default createStore({
   state: {
@@ -61,21 +61,25 @@ export default createStore({
   },
   actions: {
 		setAbortController() {
-			getAbortController = new AbortController();
-			// putAbortController = new AbortController();
+			abortController = new AbortController();
 
-			return getAbortController !== null;
+			return abortController !== null;
 		},
-		cancelPreviousGetRequest() {
-			if (getAbortController) {
-				getAbortController.abort();
+		cancelPreviousRequest() {
+			if (abortController) {
+				abortController.abort();
 			}
 		},
-		// cancelPreviousPutRequest() {
-		// 	if (putAbortController) {
-		// 		putAbortController.abort();
-		// 	}
-		// },
+		setPutEngramRequestAndLastCommittedEngramData({ commit, dispatch }, engramTitle) {
+			if (putEngramRequest) {
+				clearTimeout(putEngramRequest);
+			}
+
+			putEngramRequest = setTimeout(() => {
+				dispatch('putEngram', engramTitle);
+				commit('SET_LAST_COMMITTED_ENGRAM_DATA', engramTitle);
+			}, 3000);
+		},
 		async fetchUser({ commit, state }) {
 			try {
 				const response = await axios.get('http://localhost:3000/', { withCredentials: true });
@@ -91,7 +95,7 @@ export default createStore({
 		},
 		async fetchEngramList({ commit, state }) {
 			try {
-				const response = await axios.get('http://localhost:3000/engrams', { withCredentials: true, signal: getAbortController.signal });
+				const response = await axios.get('http://localhost:3000/engrams', { withCredentials: true, signal: abortController.signal });
 
 				if (state.engrams.length === 0) {
 					commit('SET_ENGRAMS', response.data);
@@ -112,7 +116,7 @@ export default createStore({
 		},
 		async fetchEngram({ commit, state }, engramTitle) {
 			try {
-				const response = await axios.get(`http://localhost:3000/engrams/${encodeURIComponent(engramTitle)}`, { withCredentials: true, signal: getAbortController.signal });
+				const response = await axios.get(`http://localhost:3000/engrams/${encodeURIComponent(engramTitle)}`, { withCredentials: true, signal: abortController.signal });
 
 				if (state.engrams.length === 0) {
 					commit('SET_ENGRAM', response.data);
@@ -134,16 +138,13 @@ export default createStore({
 			}
 		},
 		async putEngram({ state }, engramTitle) {
-			// dispatch('cancelPreviousPutRequest');
-			// putAbortController = new AbortController();
-
 			try {
 				const matchedEngram = state.engrams.find((engram) => engram.title === engramTitle);
 				const engramContent = matchedEngram.rootBlocks.join('\n\n');
 
 				await axios.put('http://localhost:3000/engram',
 					{ engramTitle, engramContent },
-					{ withCredentials: true, signal: getAbortController.signal });
+					{ withCredentials: true, signal: abortController.signal });
 			} catch (error) {
 				if (axios.isCancel(error)) {
 					console.log('Request from indivudal engram is canceled.');
