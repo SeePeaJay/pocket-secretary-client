@@ -39,15 +39,9 @@ export default {
 			},
 		},
 	},
-	data() {
-		return {
-			textareaContentOnFocus: '',
-		};
-	},
 	mounted() {
 		this.resizeAndFocus();
 		console.log(`textareaContentMounted: ${this.textareaContent}`);
-		this.textareaContentOnFocus = this.$refs.textarea.value; //
 	},
 	methods: {
 		msg(obj) {
@@ -57,18 +51,11 @@ export default {
 			this.$emit('exitEditMode');
 
 			if (!this.isExitingEditModeByEnterOrDeleteKey && this.isCurrentEngramBlockUpdated()) { // shouldn't be satisfied if exit by enter key
-				this.textareaContentOnFocus = this.$refs.textarea.value;
-				console.log('DISPATCH TIME');
-
 				this.$store.dispatch('putEngram', this.engramTitle);
 				this.$store.commit('SET_LAST_COMMITTED_ENGRAM_DATA', this.engramTitle);
 			}
 		},
 		isCurrentEngramBlockUpdated() {
-			console.log(`preserved: ${this.$store.state.lastCommittedEngramData.rootBlocks[this.customTextareaIndex]}`);
-			console.log(`textareaContent: ${this.textareaContent}`);
-			// console.log(`textareaContentOnFocus: ${this.textareaContentOnFocus}`);
-			// return this.textareaContent !== this.textareaContentOnFocus;
 			return this.textareaContent !== this.$store.state.lastCommittedEngramData.rootBlocks[this.customTextareaIndex];
 		},
 		resizeAndFocus() {
