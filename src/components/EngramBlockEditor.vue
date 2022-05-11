@@ -54,7 +54,6 @@ export default {
 				// router-link v-else
 
 			const blockContent = this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex];
-			let cryptarch = new Cryptarch();
 
 			// blockChunksAsHtmlOrEngramLinks
 			const blockChunks = blockContent.split(this.engramLinkRegex).filter((item) => item);
@@ -63,14 +62,15 @@ export default {
 				if (this.engramLinkRegex.test(component)) {
 					blockChunksAsHtmlOrEngramLinks.push(component);
 				} else {
+					let cryptarch = new Cryptarch();
 					const html = cryptarch.decrypt(component);
+					cryptarch = null; // is there a better way to prevent memory leak than this?
+
 					blockChunksAsHtmlOrEngramLinks.push(html);
 				}
 			});
 
-			cryptarch = null; // is there a better way to prevent memory leak than this?
-
-			console.log('why are we here');
+			// console.log(blockChunksAsHtmlOrEngramLinks);
 
 			return blockChunksAsHtmlOrEngramLinks;
 		},
