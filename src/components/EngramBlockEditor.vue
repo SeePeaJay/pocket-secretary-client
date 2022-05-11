@@ -1,5 +1,15 @@
 <template>
-	<div v-show="!isOnEditMode" @click="enterEditMode" v-html="blockInPlainHtml"></div>
+	<div v-show="!isOnEditMode" @click="enterEditMode">
+		<span v-for="(chunk, index) in blockChunksAsHtmlOrEngramLinks" :key="index">
+			<router-link
+				v-if="engramLinkRegex.test(chunk)"
+				:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(chunk) }}"
+			>
+				{{ getEngramTitle(chunk) }}
+			</router-link>
+			<span v-else v-html="chunk"></span>
+		</span>
+	</div>
 	<CustomTextarea
 		v-show="isOnEditMode"
 		ref="customTextarea"
@@ -32,20 +42,43 @@ export default {
 		return {
 			isOnEditMode: false,
 			isExitingEditModeByEnterOrDeleteKey: false,
+			engramLinkRegex: /(\*.+{})/g,
 		};
 	},
 	computed: {
-		blockInPlainHtml() {
-			const blockContent = this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex];
+		blockChunksAsHtmlOrEngramLinks() {
+			// split based on engram link first, including the delimiter
+			// for each non-delimiter, decrypt it
+			// v-for segment of segments
+				// div v-if segment is html v-html ...
+				// router-link v-else
 
+			const blockContent = this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex];
 			let cryptarch = new Cryptarch();
-			const html = cryptarch.decrypt(blockContent);
+
+			// blockChunksAsHtmlOrEngramLinks
+			const blockChunks = blockContent.split(this.engramLinkRegex).filter((item) => item);
+			const blockChunksAsHtmlOrEngramLinks = [];
+			blockChunks.forEach((component) => {
+				if (this.engramLinkRegex.test(component)) {
+					blockChunksAsHtmlOrEngramLinks.push(component);
+				} else {
+					const html = cryptarch.decrypt(component);
+					blockChunksAsHtmlOrEngramLinks.push(html);
+				}
+			});
+
 			cryptarch = null; // is there a better way to prevent memory leak than this?
 
-			return html;
+			console.log('why are we here');
+
+			return blockChunksAsHtmlOrEngramLinks;
 		},
 	},
 	methods: {
+		getEngramTitle(engramLink) {
+			return engramLink.slice(1, -2);
+		},
 		enterEditMode() {
 			this.isOnEditMode = true;
 			this.isExitingEditModeByEnterOrDeleteKey = false;
