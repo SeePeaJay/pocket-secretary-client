@@ -3,13 +3,14 @@
     v-model="textareaContent"
     ref="textarea"
     rows="1"
-		@blur="onBlurHandler();"
+		@input="$store.dispatch('setPutEngramRequestAndLastCommittedEngramData', engramTitle)"
+		@blur="$emit('exitEditMode')"
     @focus="resizeTextarea"
     @keyup="resizeTextarea"
 		@keydown.up="isAtStartOfTexarea() && !isTheFirstTextarea() && $emit('editPreviousBlock')"
 		@keydown.down="isAtEndOfTexarea() && !isTheLastTextarea() && $emit('editNextBlock')"
 		@keydown.enter="shouldEnterKeyCreateAndEditNextBlock($event) && createAndEditNextBlock()"
-		@keydown.delete="shouldDeleteKeyDeleteCurrentAndEditPreviousBlock($event) && deleteCurrentAndEditPreviousBlock();"
+		@keydown.delete="shouldDeleteKeyDeleteCurrentAndEditPreviousBlock($event) && deleteCurrentAndEditPreviousBlock()"
   >
   </textarea>
 </template>
@@ -43,19 +44,6 @@ export default {
 		this.resizeAndFocus();
 	},
 	methods: {
-		msg(obj) {
-			console.log(obj);
-		},
-		onBlurHandler() {
-			this.$emit('exitEditMode');
-
-			if (!this.isExitingEditModeByEnterOrDeleteKey && this.isCurrentEngramBlockUpdated()) { // shouldn't be satisfied if exit by enter key
-				this.$store.dispatch('setPutEngramRequestAndLastCommittedEngramData', this.engramTitle);
-			}
-		},
-		isCurrentEngramBlockUpdated() {
-			return this.textareaContent !== this.$store.state.lastCommittedEngramData.rootBlocks[this.customTextareaIndex];
-		},
 		resizeAndFocus() {
 			this.resizeTextarea();
 			this.$refs.textarea.focus();

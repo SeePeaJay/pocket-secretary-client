@@ -78,7 +78,7 @@ export default createStore({
 			putEngramRequest = setTimeout(() => {
 				dispatch('putEngram', engramTitle);
 				commit('SET_LAST_COMMITTED_ENGRAM_DATA', engramTitle);
-			}, 3000);
+			}, 1500);
 		},
 		async fetchUser({ commit, state }) {
 			try {
