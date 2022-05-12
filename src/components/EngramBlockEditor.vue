@@ -7,7 +7,7 @@
 			>
 				{{ getEngramTitle(chunk) }}
 			</router-link>
-			<div v-else v-html="chunk"></div>
+			<span v-else v-html="chunk"></span>
 		</template>
 	</div>
 	<CustomTextarea
@@ -27,6 +27,7 @@
 <script>
 import Cryptarch from '../cryptarch/cryptarch';
 import CustomTextarea from './CustomTextarea.vue';
+import { RULES } from '../cryptarch/constants';
 
 export default {
 	name: 'EngramBlockEditor',
@@ -47,17 +48,10 @@ export default {
 	},
 	computed: {
 		blockChunksAsHtmlOrEngramLinks() {
-			// split based on engram link first, including the delimiter
-			// for each non-delimiter, decrypt it
-			// v-for segment of segments
-				// div v-if segment is html v-html ...
-				// router-link v-else
-
-			const blockContent = this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex];
-
-			// blockChunksAsHtmlOrEngramLinks
-			const blockChunks = blockContent.split(this.engramLinkRegex).filter((item) => item);
+			const blockChunks = this.getBlockChunks();
 			const blockChunksAsHtmlOrEngramLinks = [];
+
+			console.log(blockChunks);
 			blockChunks.forEach((component) => {
 				if (this.engramLinkRegex.test(component)) {
 					blockChunksAsHtmlOrEngramLinks.push(component);
@@ -70,12 +64,38 @@ export default {
 				}
 			});
 
-			// console.log(blockChunksAsHtmlOrEngramLinks);
-
 			return blockChunksAsHtmlOrEngramLinks;
 		},
 	},
 	methods: {
+		getBlockChunks() {
+			const blockContent = this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex];
+			let blockChunks;
+
+			const matchingBlockMarker = blockContent.match(this.getTitleAndSubtitleMarkerPattern());
+			if (matchingBlockMarker) {
+				const blockContentWithoutBlockMarker = blockContent.replace(this.getTitleAndSubtitleMarkerPattern(), '');
+				const blockChunksWithoutBlockMarker = blockContentWithoutBlockMarker.split(this.engramLinkRegex).filter((item) => item);
+
+				blockChunks = [...blockChunksWithoutBlockMarker];
+				blockChunks[0] = `${matchingBlockMarker}${blockChunks[0]}`;
+			} else {
+				blockChunks = blockContent.split(this.engramLinkRegex).filter((item) => item);
+			}
+
+			return blockChunks;
+		},
+		getTitleAndSubtitleMarkerPattern() {
+			const titleAndSubtitlePatterns = [RULES.marker.titleMarker, RULES.marker.level1SubtitleMarker, RULES.marker.level2SubtitleMarker, RULES.marker.level3SubtitleMarker];
+
+			let titleAndSubtitlePatternString = '';
+			titleAndSubtitlePatterns.forEach((pattern) => {
+				titleAndSubtitlePatternString += `(${pattern.source})|`;
+			});
+			titleAndSubtitlePatternString = titleAndSubtitlePatternString.slice(0, -1);
+
+			return new RegExp(titleAndSubtitlePatternString, 'g');
+		},
 		getEngramTitle(engramLink) {
 			return engramLink.slice(1, -2);
 		},
@@ -119,7 +139,7 @@ export default {
 	border: solid;
 }
 
-div >>> * {
+span >>> * {
 	display: inline;
 }
 </style>
