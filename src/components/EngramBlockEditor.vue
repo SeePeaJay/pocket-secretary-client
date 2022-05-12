@@ -1,14 +1,16 @@
 <template>
 	<div v-show="!isOnEditMode" class="test" @click="enterEditMode">
-		<template v-for="(chunk, index) in blockChunksAsHtmlOrEngramLinks" :key="index">
-			<router-link
-				v-if="engramLinkRegex.test(chunk)"
-				:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(chunk) }}"
-			>
-				{{ getEngramTitle(chunk) }}
-			</router-link>
-			<span v-else v-html="chunk"></span>
-		</template>
+		<component :is="blockHtmlTagName">
+			<template v-for="(chunk, index) in blockChunksAsHtmlOrEngramLinks" :key="index">
+				<router-link
+					v-if="engramLinkRegex.test(chunk)"
+					:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(chunk) }}"
+				>
+					{{ getEngramTitle(chunk) }}
+				</router-link>
+				<span v-else v-html="chunk"></span>
+			</template>
+		</component>
 	</div>
 	<CustomTextarea
 		v-show="isOnEditMode"
@@ -47,17 +49,33 @@ export default {
 		};
 	},
 	computed: {
+		blockHtmlTagName() {
+			if (!this.getBlockContent) {
+				return 'p';
+			}
+
+			let cryptarch = new Cryptarch();
+			const html = cryptarch.decrypt(this.getBlockContent);
+			cryptarch = null;
+
+			const domParser = new DOMParser();
+			const document = domParser.parseFromString(html, 'text/html');
+			return document.body.firstChild.tagName.toLowerCase();
+		},
+		getBlockContent() {
+			return this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex];
+		},
 		blockChunksAsHtmlOrEngramLinks() {
-			const blockChunks = this.getBlockChunks();
+			const blockChunksWithoutBlockMarker = this.getBlockChunksWithoutBlockMarker();
 			const blockChunksAsHtmlOrEngramLinks = [];
 
-			console.log(blockChunks);
-			blockChunks.forEach((component) => {
-				if (this.engramLinkRegex.test(component)) {
-					blockChunksAsHtmlOrEngramLinks.push(component);
+			console.log(blockChunksWithoutBlockMarker);
+			blockChunksWithoutBlockMarker.forEach((chunk) => {
+				if (this.engramLinkRegex.test(chunk)) {
+					blockChunksAsHtmlOrEngramLinks.push(chunk);
 				} else {
 					let cryptarch = new Cryptarch();
-					const html = cryptarch.decrypt(component);
+					const html = cryptarch.decrypt(chunk);
 					cryptarch = null; // is there a better way to prevent memory leak than this?
 
 					blockChunksAsHtmlOrEngramLinks.push(html);
@@ -68,22 +86,16 @@ export default {
 		},
 	},
 	methods: {
-		getBlockChunks() {
-			const blockContent = this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex];
-			let blockChunks;
+		getBlockChunksWithoutBlockMarker() {
+			const blockContent = this.getBlockContent;
 
 			const matchingBlockMarker = blockContent.match(this.getTitleAndSubtitleMarkerPattern());
 			if (matchingBlockMarker) {
 				const blockContentWithoutBlockMarker = blockContent.replace(this.getTitleAndSubtitleMarkerPattern(), '');
-				const blockChunksWithoutBlockMarker = blockContentWithoutBlockMarker.split(this.engramLinkRegex).filter((item) => item);
-
-				blockChunks = [...blockChunksWithoutBlockMarker];
-				blockChunks[0] = `${matchingBlockMarker}${blockChunks[0]}`;
-			} else {
-				blockChunks = blockContent.split(this.engramLinkRegex).filter((item) => item);
+				return blockContentWithoutBlockMarker.split(this.engramLinkRegex).filter((item) => item);
 			}
 
-			return blockChunks;
+			return blockContent.split(this.engramLinkRegex).filter((item) => item);
 		},
 		getTitleAndSubtitleMarkerPattern() {
 			const titleAndSubtitlePatterns = [RULES.marker.titleMarker, RULES.marker.level1SubtitleMarker, RULES.marker.level2SubtitleMarker, RULES.marker.level3SubtitleMarker];
