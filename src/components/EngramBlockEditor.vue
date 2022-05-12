@@ -1,14 +1,14 @@
 <template>
-	<div v-show="!isOnEditMode" @click="enterEditMode">
-		<span v-for="(chunk, index) in blockChunksAsHtmlOrEngramLinks" :key="index">
+	<div v-show="!isOnEditMode" class="test" @click="enterEditMode">
+		<template v-for="(chunk, index) in blockChunksAsHtmlOrEngramLinks" :key="index">
 			<router-link
 				v-if="engramLinkRegex.test(chunk)"
 				:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(chunk) }}"
 			>
 				{{ getEngramTitle(chunk) }}
 			</router-link>
-			<span v-else v-html="chunk"></span>
-		</span>
+			<div v-else v-html="chunk"></div>
+		</template>
 	</div>
 	<CustomTextarea
 		v-show="isOnEditMode"
@@ -109,7 +109,17 @@ export default {
 </script>
 
 <style scoped>
-div {
+/* div {
+	display: flex;
+	flex: 1 0 auto;
+	min-width: 0;
+} */
+
+.test{
 	border: solid;
+}
+
+div >>> * {
+	display: inline;
 }
 </style>
