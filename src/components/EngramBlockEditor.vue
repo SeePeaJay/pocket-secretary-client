@@ -45,35 +45,37 @@ export default {
 		return {
 			isOnEditMode: false,
 			isExitingEditModeByEnterOrDeleteKey: false,
-			engramLinkRegex: /(\*.+{})/g,
+			engramLinkRegex: /(\*.+{})/,
 		};
 	},
 	computed: {
 		blockHtmlTagName() {
-			if (!this.getBlockContent) {
+			if (!this.blockContent) {
 				return 'p';
 			}
 
 			let cryptarch = new Cryptarch();
-			const html = cryptarch.decrypt(this.getBlockContent);
+			const html = cryptarch.decrypt(this.blockContent);
 			cryptarch = null;
 
 			const domParser = new DOMParser();
 			const document = domParser.parseFromString(html, 'text/html');
 			return document.body.firstChild.tagName.toLowerCase();
 		},
-		getBlockContent() {
+		blockContent() {
 			return this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex];
 		},
 		blockChunksAsHtmlOrEngramLinks() {
 			const blockChunksWithoutBlockMarker = this.getBlockChunksWithoutBlockMarker();
 			const blockChunksAsHtmlOrEngramLinks = [];
 
-			console.log(blockChunksWithoutBlockMarker);
+			// console.log(blockChunksWithoutBlockMarker);
 			blockChunksWithoutBlockMarker.forEach((chunk) => {
 				if (this.engramLinkRegex.test(chunk)) {
+					// console.log(`forEach chunk: ${this.blockIndex}: ${chunk}: yes link`);
 					blockChunksAsHtmlOrEngramLinks.push(chunk);
 				} else {
+					// console.log(`forEach chunk: ${this.blockIndex}: ${chunk}: no link`);
 					let cryptarch = new Cryptarch();
 					const html = cryptarch.decrypt(chunk);
 					cryptarch = null; // is there a better way to prevent memory leak than this?
@@ -82,20 +84,20 @@ export default {
 				}
 			});
 
+			// console.log(blockChunksAsHtmlOrEngramLinks);
+
 			return blockChunksAsHtmlOrEngramLinks;
 		},
 	},
 	methods: {
 		getBlockChunksWithoutBlockMarker() {
-			const blockContent = this.getBlockContent;
-
-			const matchingBlockMarker = blockContent.match(this.getTitleAndSubtitleMarkerPattern());
+			const matchingBlockMarker = this.blockContent.match(this.getTitleAndSubtitleMarkerPattern());
 			if (matchingBlockMarker) {
-				const blockContentWithoutBlockMarker = blockContent.replace(this.getTitleAndSubtitleMarkerPattern(), '');
+				const blockContentWithoutBlockMarker = this.blockContent.replace(this.getTitleAndSubtitleMarkerPattern(), '');
 				return blockContentWithoutBlockMarker.split(this.engramLinkRegex).filter((item) => item);
 			}
 
-			return blockContent.split(this.engramLinkRegex).filter((item) => item);
+			return this.blockContent.split(this.engramLinkRegex).filter((item) => item);
 		},
 		getTitleAndSubtitleMarkerPattern() {
 			const titleAndSubtitlePatterns = [RULES.marker.titleMarker, RULES.marker.level1SubtitleMarker, RULES.marker.level2SubtitleMarker, RULES.marker.level3SubtitleMarker];
