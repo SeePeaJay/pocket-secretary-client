@@ -1,17 +1,9 @@
 <template>
-	<div v-show="!isOnEditMode" class="test" @click="enterEditMode">
-		<component :is="blockHtmlTagName">
-			<template v-for="(chunk, index) in blockChunksAsHtmlOrEngramLinks" :key="index">
-				<router-link
-					v-if="engramLinkRegex.test(chunk)"
-					:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(chunk) }}"
-				>
-					{{ getEngramTitle(chunk) }}
-				</router-link>
-				<span v-else v-html="chunk"></span>
-			</template>
-		</component>
-	</div>
+	<RenderedEngramBlock
+		v-show="!isOnEditMode"
+		:engramTitle="engramTitle" :blockIndex="blockIndex"
+		@click="enterEditMode"
+	/>
 	<CustomTextarea
 		v-show="isOnEditMode"
 		ref="customTextarea"
@@ -27,13 +19,13 @@
 </template>
 
 <script>
-import Cryptarch from '../cryptarch/cryptarch';
+import RenderedEngramBlock from './RenderedEngramBlock.vue';
 import CustomTextarea from './CustomTextarea.vue';
-import { RULES } from '../cryptarch/constants';
 
 export default {
 	name: 'EngramBlockEditor',
 	components: {
+		RenderedEngramBlock,
 		CustomTextarea,
 	},
 	props: {
@@ -45,74 +37,9 @@ export default {
 		return {
 			isOnEditMode: false,
 			isExitingEditModeByEnterOrDeleteKey: false,
-			engramLinkRegex: /(\*.+{})/,
 		};
 	},
-	computed: {
-		blockHtmlTagName() {
-			if (!this.blockContent) {
-				return 'p';
-			}
-
-			let cryptarch = new Cryptarch();
-			const html = cryptarch.decrypt(this.blockContent);
-			cryptarch = null;
-
-			const domParser = new DOMParser();
-			const document = domParser.parseFromString(html, 'text/html');
-			return document.body.firstChild.tagName.toLowerCase();
-		},
-		blockContent() {
-			return this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex];
-		},
-		blockChunksAsHtmlOrEngramLinks() {
-			const blockChunksWithoutBlockMarker = this.getBlockChunksWithoutBlockMarker();
-			const blockChunksAsHtmlOrEngramLinks = [];
-
-			// console.log(blockChunksWithoutBlockMarker);
-			blockChunksWithoutBlockMarker.forEach((chunk) => {
-				if (this.engramLinkRegex.test(chunk)) {
-					// console.log(`forEach chunk: ${this.blockIndex}: ${chunk}: yes link`);
-					blockChunksAsHtmlOrEngramLinks.push(chunk);
-				} else {
-					// console.log(`forEach chunk: ${this.blockIndex}: ${chunk}: no link`);
-					let cryptarch = new Cryptarch();
-					const html = cryptarch.decrypt(chunk);
-					cryptarch = null; // is there a better way to prevent memory leak than this?
-
-					blockChunksAsHtmlOrEngramLinks.push(html);
-				}
-			});
-
-			// console.log(blockChunksAsHtmlOrEngramLinks);
-
-			return blockChunksAsHtmlOrEngramLinks;
-		},
-	},
 	methods: {
-		getBlockChunksWithoutBlockMarker() {
-			const matchingBlockMarker = this.blockContent.match(this.getTitleAndSubtitleMarkerPattern());
-			if (matchingBlockMarker) {
-				const blockContentWithoutBlockMarker = this.blockContent.replace(this.getTitleAndSubtitleMarkerPattern(), '');
-				return blockContentWithoutBlockMarker.split(this.engramLinkRegex).filter((item) => item);
-			}
-
-			return this.blockContent.split(this.engramLinkRegex).filter((item) => item);
-		},
-		getTitleAndSubtitleMarkerPattern() {
-			const titleAndSubtitlePatterns = [RULES.marker.titleMarker, RULES.marker.level1SubtitleMarker, RULES.marker.level2SubtitleMarker, RULES.marker.level3SubtitleMarker];
-
-			let titleAndSubtitlePatternString = '';
-			titleAndSubtitlePatterns.forEach((pattern) => {
-				titleAndSubtitlePatternString += `(${pattern.source})|`;
-			});
-			titleAndSubtitlePatternString = titleAndSubtitlePatternString.slice(0, -1);
-
-			return new RegExp(titleAndSubtitlePatternString, 'g');
-		},
-		getEngramTitle(engramLink) {
-			return engramLink.slice(1, -2);
-		},
 		enterEditMode() {
 			this.isOnEditMode = true;
 			this.isExitingEditModeByEnterOrDeleteKey = false;
@@ -141,19 +68,3 @@ export default {
 	},
 };
 </script>
-
-<style scoped>
-/* div {
-	display: flex;
-	flex: 1 0 auto;
-	min-width: 0;
-} */
-
-.test{
-	border: solid;
-}
-
-span >>> * {
-	display: inline;
-}
-</style>
