@@ -1,14 +1,14 @@
 <template>
 	<div class="test">
-		<component :is="blockHtmlTagName">
-			<template v-for="(chunk, index1) in htmlBlockTextChunks" :key="index1">
+		<component :is="htmlTagName">
+			<template v-for="(chunk, index1) in htmlChunks" :key="index1">
 				<router-link
 					v-if="engramLinkRegex.test(chunk)"
 					:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(chunk) }}"
 				>
 					{{ getEngramTitle(chunk) }}
 				</router-link>
-				<!-- <li v-else-if="blockHtmlTagName === 'ul' || blockHtmlTagName === 'ol'">
+				<!-- <li v-else-if="htmlTagName === 'ul' || htmlTagName === 'ol'">
 					<template v-for="(listItemChunk, index2) in chunk.textNodes" :key="index2">
 						<router-link
 							v-if="engramLinkRegex.test(listItemChunk)"
@@ -16,11 +16,11 @@
 						>
 							{{ getEngramTitle(listItemChunk) }}
 						</router-link>
-						<span v-else v-html="chunk"></span>
+						<div v-else v-html="listItemChunk"></div>
 					</template>
 					<RenderedEngramBlock
-						v-if="'listNode' in htmlBlockTextChunks[index1]"
-						:htmlBlockTextChunksRecursive="htmlBlockTextChunks[index1].listNode"
+						v-if="'listNode' in htmlChunks[index2]"
+						:htmlChunksRecursive="htmlChunks[index2].listNode"
 					/>
 				</li> -->
 				<div v-else v-html="chunk"></div>
@@ -32,13 +32,13 @@
 <script>
 import Cryptarch from '../cryptarch/cryptarch';
 // import Lexer from '../cryptarch/lexer';
-import { RULES, TREE_NODE_TYPES } from '../cryptarch/constants';
+import { TREE_NODE_TYPES } from '../cryptarch/constants';
 
 export default {
 	name: 'RenderedEngramBlock',
 	props: {
 		blockContent: String,
-		htmlBlockTextChunksRecursive: Array,
+		htmlChunksRecursive: Array,
   },
 	data() {
 		return {
@@ -46,7 +46,7 @@ export default {
 		};
 	},
 	computed: {
-		blockHtmlTagName() {
+		htmlTagName() {
 			if (!this.blockContent) {
 				return 'p';
 			}
@@ -59,79 +59,34 @@ export default {
 			const document = domParser.parseFromString(html, 'text/html');
 			return document.body.firstChild.tagName.toLowerCase();
 		},
-		htmlBlockTextChunks() {
-			if (this.htmlBlockTextChunksRecursive) {
-				return this.htmlBlockTextChunksRecursive;
+		htmlChunks() {
+			if (this.htmlChunksRecursive) {
+				return this.htmlChunksRecursive;
 			}
 
-			// let cryptarch = new Cryptarch();
-			// const tree = cryptarch.getParseTree(this.blockContent);
-			// cryptarch = null;
+			let cryptarch = new Cryptarch();
+			const tree = cryptarch.getParseTree(this.blockContent);
+			cryptarch = null;
 
-			// if (tree.rootBlockNodes[0].type === 'image') {
-			// 	return this.getHtmlChunksForImage(tree.rootBlockNodes[0]);
-			// }
+			console.log(tree);
 
-			// if (tree.rootBlockNodes[0].type === 'paragraph') {
-			// 	return this.getHtmlChunksForParagraph();
-			// }
+			if (tree.rootBlockNodes.length === 0 || tree.rootBlockNodes[0].type === 'paragraph') {
+				return this.getHtmlChunksForParagraph();
+			}
 
-			// if (tree.rootBlockNodes[0].type === 'unordered list' || tree.rootBlockNodes[0].type === 'ordered list') {
-			// 	return this.getHtmlBlockTextChunksForList(tree.rootBlockNodes[0].listItemNodes);
-			// }
+			if (tree.rootBlockNodes[0].type === 'image') {
+				return this.getHtmlChunksForImage(tree.rootBlockNodes[0]);
+			}
 
-			// return this.getHtmlChunksForBlocksWithBlockMarker(tree.rootBlockNodes[0].textNodes);
+			if (tree.rootBlockNodes[0].type === 'unordered list' || tree.rootBlockNodes[0].type === 'ordered list') {
+				return this.getHtmlChunksForParagraph();
+				// return this.getHtmlChunksForList(tree.rootBlockNodes[0].listItemNodes);
+			}
 
-			const blockChunksWithoutBlockMarker = this.getBlockTextChunks();
-			const htmlBlockTextChunks = [];
-
-			blockChunksWithoutBlockMarker.forEach((chunk) => {
-				if (this.engramLinkRegex.test(chunk)) {
-					htmlBlockTextChunks.push(chunk);
-				} else {
-					let cryptarch2 = new Cryptarch();
-					const html = cryptarch2.decrypt(chunk);
-					cryptarch2 = null; // is there a better way to prevent memory leak than this?
-
-					htmlBlockTextChunks.push(html);
-				}
-			});
-
-			return htmlBlockTextChunks;
+			return this.getHtmlChunksForRemainingBlocksWithBlockMarker(tree.rootBlockNodes[0].textNodes);
 		},
 	},
 	methods: {
-		getBlockTextChunks() {
-			let blockTextChunks;
-
-			const matchingBlockMarker = this.blockContent.match(this.getTextualBlockMarkerPattern());
-			if (matchingBlockMarker && (this.blockHtmlTagName !== 'ul' && this.blockHtmlTagName !== 'ol')) {
-				const blockContentWithoutBlockMarker = this.blockContent.replace(this.getTextualBlockMarkerPattern(), '');
-				blockTextChunks = blockContentWithoutBlockMarker.split(this.engramLinkRegex).filter((item) => item);
-			}	else if (matchingBlockMarker && (this.blockHtmlTagName === 'ul' || this.blockHtmlTagName === 'ol')) {
-				let cryptarch = new Cryptarch();
-				const tree = cryptarch.getParseTree(this.blockContent);
-				cryptarch = null;
-
-				blockTextChunks = this.blockContent.split(this.engramLinkRegex).filter((item) => item);
-				// blockTextChunks = [...tree.rootBlockNodes[0].listItemNodes];
-
-				// let { listItemNodes } = tree.rootBlockNodes[0];
-				// while (listItemNodes && listItemNodes.length) {
-				// 	for (let i = 0; i < listItemNodes.length; i++) {
-				// 		if ('listNode' in listItemNodes[i] && 'listItemNodes' in listItemNodes[i].listNode) {
-				// 			listItemNodes[i] =
-				// 			listItemNodes = listItemNodes[i].listNode.listItemNodes;
-				// 		}
-				// 	}
-				// }
-				console.log(this.getHtmlBlockTextChunksForList(tree.rootBlockNodes[0].listItemNodes));
-			} else {
-				blockTextChunks = this.blockContent.split(this.engramLinkRegex).filter((item) => item);
-			}
-
-			return blockTextChunks;
-		},
 		getHtmlChunksForImage() {
 			let cryptarch = new Cryptarch();
 			const html = cryptarch.decrypt(this.blockContent);
@@ -157,7 +112,7 @@ export default {
 
 			return htmlChunks;
 		},
-		getHtmlBlockTextChunksForList(listItemNodes) {
+		getHtmlChunksForList(listItemNodes) {
 			const blockTextChunks = [];
 
 			listItemNodes.forEach((node) => {
@@ -183,7 +138,7 @@ export default {
 				}
 
 				if ('listNode' in node) {
-					blockTextChunkItem.listNode = this.getHtmlBlockTextChunksForList(node.listNode.listItemNodes);
+					blockTextChunkItem.listNode = this.getHtmlChunksForList(node.listNode.listItemNodes);
 				}
 
 				blockTextChunks.push(blockTextChunkItem);
@@ -191,7 +146,7 @@ export default {
 
 			return blockTextChunks;
 		},
-		getHtmlChunksForBlocksWithBlockMarker(textNodes) {
+		getHtmlChunksForRemainingBlocksWithBlockMarker(textNodes) {
 			const blockTextChunks = this.getJoinedText(textNodes).split(this.engramLinkRegex).filter((item) => item);
 
 			const htmlChunks = [];
@@ -244,17 +199,6 @@ export default {
 
 			return text;
 		},
-		getTextualBlockMarkerPattern() {
-			const textualBlockPatterns = [RULES.marker.titleMarker, RULES.marker.level1SubtitleMarker, RULES.marker.level2SubtitleMarker, RULES.marker.level3SubtitleMarker, RULES.marker.unorderedListMarker, RULES.marker.orderedListMarker];
-
-			let textualBlockPatternString = '';
-			textualBlockPatterns.forEach((pattern) => {
-				textualBlockPatternString += `(${pattern.source})|`;
-			});
-			textualBlockPatternString = textualBlockPatternString.slice(0, -1);
-
-			return new RegExp(textualBlockPatternString, 'g');
-		},
 		getEngramTitle(engramLink) {
 			return engramLink.slice(1, -2);
 		},
@@ -267,7 +211,7 @@ export default {
 	border: solid;
 }
 
-div >>> * {
+div >>> *:not(ul, li) {
 	display: inline;
 }
 </style>
