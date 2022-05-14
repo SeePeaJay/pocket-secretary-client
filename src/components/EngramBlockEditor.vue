@@ -1,7 +1,7 @@
 <template>
 	<RenderedEngramBlock
 		v-show="!isOnEditMode"
-		:engramTitle="engramTitle" :blockIndex="blockIndex"
+		:blockContent="$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex]"
 		@click="enterEditMode"
 	/>
 	<CustomTextarea
