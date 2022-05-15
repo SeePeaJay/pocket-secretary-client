@@ -1,4 +1,3 @@
-// import * as Vue from 'vue/dist/vue.esm-bundler';
 import { createApp } from 'vue/dist/vue.esm-bundler';
 import App from './App.vue';
 import router from './router';
@@ -13,17 +12,15 @@ createApp(App).use(router).use(store).component('VHtml', { // https://forum.vuej
     },
   },
   directives: {
-    swap: {
-      mounted(el, binding) {
-        // createContextualFragment allows script execution
-        // why you would probably want to sanitize the html
-        // e.g. using https://github.com/cure53/DOMPurify
-        const safe = binding.value; // cryptarch should not produce unsanitary html, so extra calls aren't being made here
+    swap: (el, binding) => {
+			// createContextualFragment allows script execution
+			// why you would probably want to sanitize the html
+			// e.g. using https://github.com/cure53/DOMPurify
+			const safe = binding.value; // cryptarch should not produce unsanitary html, so extra sanitizing calls aren't being made here
 
-        const frag = document.createRange().createContextualFragment(safe);
-        el.replaceWith(frag);
-      },
-    },
+			const frag = document.createRange().createContextualFragment(safe);
+			el.replaceWith(frag);
+		},
   },
   template: '<div v-swap="html"></div>',
 })

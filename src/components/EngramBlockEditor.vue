@@ -1,11 +1,6 @@
 <template>
-	<RenderedEngramBlock
-		v-show="!isOnEditMode"
-		:blockContent="$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex]"
-		@click="enterEditMode"
-	/>
 	<CustomTextarea
-		v-show="isOnEditMode"
+		v-if="isOnEditMode"
 		ref="customTextarea"
 		:engram-title="engramTitle"
 		:custom-textarea-index="blockIndex"
@@ -16,17 +11,22 @@
 		@create-and-edit-next-block="createAndEditNextBlock"
 		@delete-current-and-edit-previous-block="deleteCurrentAndEditPreviousBlock"
 	/>
+	<RenderedEngramBlock
+		v-else
+		:blockContent="$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex]"
+		@click="enterEditMode"
+	/>
 </template>
 
 <script>
-import RenderedEngramBlock from './RenderedEngramBlock.vue';
 import CustomTextarea from './CustomTextarea.vue';
+import RenderedEngramBlock from './RenderedEngramBlock.vue';
 
 export default {
 	name: 'EngramBlockEditor',
 	components: {
-		RenderedEngramBlock,
 		CustomTextarea,
+		RenderedEngramBlock,
 	},
 	props: {
 		engramTitle: String,

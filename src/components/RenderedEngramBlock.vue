@@ -1,32 +1,32 @@
 <template>
 	<div class="test">
-		<component :is="htmlTagName">
-			<template v-for="(chunk, index1) in htmlChunks" :key="index1">
-				<router-link
-					v-if="engramLinkRegex.test(chunk)"
-					:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(chunk) }}"
-				>
-					{{ getEngramTitle(chunk) }}
-				</router-link>
-				<!-- <li v-else-if="htmlTagName === 'ul' || htmlTagName === 'ol'">
-					<template v-for="(listItemChunk, index2) in chunk.textNodes" :key="index2">
+		<component v-if="isTextualBlock" :is="htmlTagName">
+			<template v-for="(htmlChunk, index1) in htmlChunks" :key="index1">
+				<li v-if="htmlTagName === 'ul' || htmlTagName === 'ol'">
+					<template v-for="(listItemChunk, index2) in htmlChunk.textNodes" :key="index2">
 						<router-link
 							v-if="engramLinkRegex.test(listItemChunk)"
 							:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(listItemChunk) }}"
 						>
 							{{ getEngramTitle(listItemChunk) }}
 						</router-link>
-						<div v-else v-html="listItemChunk"></div>
+						<v-html v-else :html="listItemChunk"></v-html>
 					</template>
 					<RenderedEngramBlock
-						v-if="'listNode' in htmlChunks[index2]"
-						:htmlChunksRecursive="htmlChunks[index2].listNode"
+						v-if="'listNode' in htmlChunks[index1]"
+						:htmlChunksFromThisComponent="htmlChunks[index1].listNode.listItemNodes"
 					/>
-				</li> -->
-				<!-- <div v-else v-html="chunk"></div> -->
-				<v-html v-else :html="chunk"></v-html>
+				</li>
+				<router-link
+					v-else-if="engramLinkRegex.test(htmlChunk)"
+					:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(htmlChunk) }}"
+				>
+					{{ getEngramTitle(htmlChunk) }}
+				</router-link>
+				<v-html v-else :html="htmlChunk"></v-html>
 			</template>
 		</component>
+		<v-html v-else :html="html"></v-html> <!-- if image or line break -->
 	</div>
 </template>
 
@@ -39,14 +39,19 @@ export default {
 	name: 'RenderedEngramBlock',
 	props: {
 		blockContent: String,
-		htmlChunksRecursive: Array,
+		htmlChunksFromThisComponent: Array,
   },
 	data() {
 		return {
-			engramLinkRegex: /(\*(?:.|\n(?! *\n)(?! *\d{0,9}\.))+{})/, // bracket to include delimiter in result during split
+			componentKey: 0,
+			engramLinkRegex: /(\*(?:.|\n(?! *\n)(?! *\d{0,9}\.))+{})/, // bracket to include delimiter in result after split
 		};
 	},
 	computed: {
+		isTextualBlock() { // check if currently rendered block contains textual info (not image or line breaks).
+			console.log(this.htmlTagName);
+			return this.htmlTagName !== 'img' && this.htmlTagName !== 'hr';
+		},
 		htmlTagName() {
 			if (!this.blockContent) {
 				return 'p';
@@ -60,110 +65,118 @@ export default {
 			const document = domParser.parseFromString(html, 'text/html');
 			return document.body.firstChild.tagName.toLowerCase();
 		},
-		htmlChunks() {
-			if (this.htmlChunksRecursive) {
-				return this.htmlChunksRecursive;
+		html() {
+			let cryptarch = new Cryptarch();
+			const html = cryptarch.decrypt(this.blockContent);
+			cryptarch = null; // is there a better way to prevent memory leak than this?
+
+			console.log(html);
+
+			return html;
+		},
+		htmlChunks() { // chunks include engram links.
+			if (this.htmlChunksFromThisComponent) {
+				return this.htmlChunksFromThisComponent;
 			}
 
 			let cryptarch = new Cryptarch();
 			const tree = cryptarch.getParseTree(this.blockContent);
 			cryptarch = null;
 
-			console.log(tree);
-
-			if (tree.rootBlockNodes.length === 0 || tree.rootBlockNodes[0].type === 'paragraph') {
-				return this.getHtmlChunksForParagraph();
+			if (tree.rootBlockNodes.length === 0) {
+				return [''];
 			}
 
-			if (tree.rootBlockNodes[0].type === 'image') {
-				return this.getHtmlChunksForImage(tree.rootBlockNodes[0]);
+			// if (tree.rootBlockNodes[0].type === 'image') {
+			// 	return this.getHtmlChunksForImage(tree.rootBlockNodes[0]);
+			// }
+
+			if (tree.rootBlockNodes[0].type === 'paragraph') {
+				return this.getHtmlChunksForParagraph();
 			}
 
 			if (tree.rootBlockNodes[0].type === 'unordered list' || tree.rootBlockNodes[0].type === 'ordered list') {
-				return this.getHtmlChunksForParagraph();
-				// return this.getHtmlChunksForList(tree.rootBlockNodes[0].listItemNodes);
+				// return this.getHtmlChunksForParagraph();
+				return this.getHtmlChunksForList(tree.rootBlockNodes[0].listItemNodes);
 			}
+
+			console.log(tree.rootBlockNodes[0]);
 
 			return this.getHtmlChunksForRemainingBlocksWithBlockMarker(tree.rootBlockNodes[0].textNodes);
 		},
 	},
 	methods: {
-		getHtmlChunksForImage() {
-			let cryptarch = new Cryptarch();
-			const html = cryptarch.decrypt(this.blockContent);
-			cryptarch = null; // is there a better way to prevent memory leak than this?
-
-			return [...html];
-		},
 		getHtmlChunksForParagraph() {
-			const blockTextChunks = this.blockContent.split(this.engramLinkRegex).filter((item) => item);
+			const textChunks = this.blockContent.split(this.engramLinkRegex).filter((item) => item);
 
 			const htmlChunks = [];
-			blockTextChunks.forEach((chunk) => {
-				if (this.engramLinkRegex.test(chunk)) {
-					htmlChunks.push(chunk);
+			textChunks.forEach((textChunk) => {
+				if (this.engramLinkRegex.test(textChunk)) {
+					htmlChunks.push(textChunk);
 				} else {
 					let cryptarch = new Cryptarch();
-					let html = cryptarch.decrypt(chunk);
+					let htmlChunk = cryptarch.decrypt(textChunk);
 					cryptarch = null;
 
-					html = html.replace('<p>', '').replace(/<\/p>$/, '');
+					htmlChunk = htmlChunk.replace('<p>', '').replace(/<\/p>$/, '');
 
-					htmlChunks.push(html);
+					htmlChunks.push(htmlChunk);
 				}
 			});
 
 			return htmlChunks;
 		},
 		getHtmlChunksForList(listItemNodes) {
-			const blockTextChunks = [];
+			const htmlChunksForList = [];
 
-			listItemNodes.forEach((node) => {
+			listItemNodes.forEach((listItemNode) => {
 				// console.log(node);
-				const blockTextChunkItem = { title: node.type };
+				const htmlChunksForListItem = { title: listItemNode.type };
 
-				if ('textNodes' in node) {
-					blockTextChunkItem.textNodes = [];
+				if ('textNodes' in listItemNode) {
+					htmlChunksForListItem.textNodes = [];
 
-					const listItemTextChunks = this.getJoinedText(node.textNodes).split(this.engramLinkRegex).filter((item) => item);
+					const listItemTextChunks = this.getJoinedText(listItemNode.textNodes).split(this.engramLinkRegex).filter((item) => item);
 
-					listItemTextChunks.forEach((chunk) => {
-						if (this.engramLinkRegex.test(chunk)) {
-							blockTextChunkItem.textNodes.push(chunk);
+					listItemTextChunks.forEach((listItemTextChunk) => {
+						if (this.engramLinkRegex.test(listItemTextChunk)) {
+							htmlChunksForListItem.textNodes.push(listItemTextChunk);
 						} else {
 							let cryptarch = new Cryptarch();
-							const html = cryptarch.decrypt(chunk);
+							let htmlChunk = cryptarch.decrypt(listItemTextChunk);
 							cryptarch = null;
 
-							blockTextChunkItem.textNodes.push(html);
+							htmlChunk = htmlChunk.replace('<p>', '').replace(/<\/p>$/, '');
+
+							htmlChunksForListItem.textNodes.push(htmlChunk);
 						}
 					});
 				}
 
-				if ('listNode' in node) {
-					blockTextChunkItem.listNode = this.getHtmlChunksForList(node.listNode.listItemNodes);
+				if ('listNode' in listItemNode) {
+					htmlChunksForListItem.listNode = this.getHtmlChunksForList(listItemNode.listNode.listItemNodes);
 				}
 
-				blockTextChunks.push(blockTextChunkItem);
+				htmlChunksForList.push(htmlChunksForListItem);
 			});
 
-			return blockTextChunks;
+			return htmlChunksForList;
 		},
 		getHtmlChunksForRemainingBlocksWithBlockMarker(textNodes) {
-			const blockTextChunks = this.getJoinedText(textNodes).split(this.engramLinkRegex).filter((item) => item);
+			const textChunks = this.getJoinedText(textNodes).split(this.engramLinkRegex).filter((item) => item);
 
 			const htmlChunks = [];
-			blockTextChunks.forEach((chunk) => {
-				if (this.engramLinkRegex.test(chunk)) {
-					htmlChunks.push(chunk);
+			textChunks.forEach((textChunk) => {
+				if (this.engramLinkRegex.test(textChunk)) {
+					htmlChunks.push(textChunk);
 				} else {
 					let cryptarch = new Cryptarch();
-					let html = cryptarch.decrypt(chunk);
+					let htmlChunk = cryptarch.decrypt(textChunk);
 					cryptarch = null;
 
-					html = html.replace('<p>', '').replace(/<\/p>$/, '');
+					htmlChunk = htmlChunk.replace('<p>', '').replace(/<\/p>$/, '');
 
-					htmlChunks.push(html);
+					htmlChunks.push(htmlChunk);
 				}
 			});
 
@@ -216,7 +229,7 @@ export default {
 	border: solid;
 }
 
-div >>> *:not(ul, li) {
+/* div >>> *:not(ul, li) {
 	display: inline;
-}
+} */
 </style>
