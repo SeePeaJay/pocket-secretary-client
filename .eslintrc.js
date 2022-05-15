@@ -23,5 +23,6 @@ module.exports = {
 		'vue/no-multiple-template-root': 0,
 		'arrow-body-style': 0,
 		'prefer-object-spread': 0,
+		'no-underscore-dangle': [0, { 'allow': ['_vnode'] }],
   },
 };

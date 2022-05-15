@@ -23,7 +23,8 @@
 						:htmlChunksRecursive="htmlChunks[index2].listNode"
 					/>
 				</li> -->
-				<div v-else v-html="chunk"></div>
+				<!-- <div v-else v-html="chunk"></div> -->
+				<v-html v-else :html="chunk"></v-html>
 			</template>
 		</component>
 	</div>
@@ -103,8 +104,10 @@ export default {
 					htmlChunks.push(chunk);
 				} else {
 					let cryptarch = new Cryptarch();
-					const html = cryptarch.decrypt(chunk);
+					let html = cryptarch.decrypt(chunk);
 					cryptarch = null;
+
+					html = html.replace('<p>', '').replace(/<\/p>$/, '');
 
 					htmlChunks.push(html);
 				}
@@ -155,8 +158,10 @@ export default {
 					htmlChunks.push(chunk);
 				} else {
 					let cryptarch = new Cryptarch();
-					const html = cryptarch.decrypt(chunk);
+					let html = cryptarch.decrypt(chunk);
 					cryptarch = null;
+
+					html = html.replace('<p>', '').replace(/<\/p>$/, '');
 
 					htmlChunks.push(html);
 				}
