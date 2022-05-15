@@ -1,29 +1,17 @@
 <template>
-	<div class="test">
-		<component v-if="isTextualBlock" :is="htmlTagName">
-			<template v-for="(htmlChunk, index1) in htmlChunks" :key="index1">
-				<li v-if="htmlTagName === 'ul' || htmlTagName === 'ol'">
-					<template v-for="(listItemChunk, index2) in htmlChunk.textNodes" :key="index2">
-						<router-link
-							v-if="engramLinkRegex.test(listItemChunk)"
-							:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(listItemChunk) }}"
-						>
-							{{ getEngramTitle(listItemChunk) }}
-						</router-link>
-						<v-html v-else :html="listItemChunk"></v-html>
-					</template>
-					<RenderedEngramBlock
-						v-if="'listNode' in htmlChunks[index1]"
-						:htmlChunksFromThisComponent="htmlChunks[index1].listNode.listItemNodes"
-					/>
-				</li>
+	<div class="test"> <!-- div to make block clickable -->
+		<!-- <RenderedEngramList v-if="htmlTagName === 'ul' || htmlTagName === 'ol'"
+			:ulOrOl="htmlTagName" :listNode="parseTreeForList.rootBlockNodes[0]" :engramLinkRegex="engramLinkRegex"
+		/> -->
+		<component v-if="isTextualBlock" :is="htmlTagName"> <!-- if not list, image, or line break -->
+			<template v-for="(chunk, index) in htmlChunks" :key="index">
 				<router-link
-					v-else-if="engramLinkRegex.test(htmlChunk)"
-					:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(htmlChunk) }}"
+					v-if="engramLinkRegex.test(chunk)"
+					:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(chunk) } }"
 				>
-					{{ getEngramTitle(htmlChunk) }}
+					{{ getEngramTitle(chunk) }}
 				</router-link>
-				<v-html v-else :html="htmlChunk"></v-html>
+				<v-html v-else :html="chunk"></v-html>
 			</template>
 		</component>
 		<v-html v-else :html="html"></v-html> <!-- if image or line break -->
@@ -34,9 +22,13 @@
 import Cryptarch from '../cryptarch/cryptarch';
 // import Lexer from '../cryptarch/lexer';
 import { TREE_NODE_TYPES } from '../cryptarch/constants';
+import RenderedEngramList from './RenderedEngramList.vue';
 
 export default {
 	name: 'RenderedEngramBlock',
+	components: {
+		RenderedEngramList,
+	},
 	props: {
 		blockContent: String,
 		htmlChunksFromThisComponent: Array,
@@ -49,7 +41,6 @@ export default {
 	},
 	computed: {
 		isTextualBlock() { // check if currently rendered block contains textual info (not image or line breaks).
-			console.log(this.htmlTagName);
 			return this.htmlTagName !== 'img' && this.htmlTagName !== 'hr';
 		},
 		htmlTagName() {
@@ -74,16 +65,34 @@ export default {
 
 			return html;
 		},
+		parseTree() {
+			let cryptarch = new Cryptarch();
+			const tree = cryptarch.getParseTree(this.blockContent);
+			cryptarch = null;
+
+			return tree;
+		},
+		parseTreeForList() { // simplified for ...
+			return {
+				type: this.parseTree.type,
+				rootBlockNodes: [
+					{
+						type: this.parseTree.rootBlockNodes[0].type,
+						listItemNodes: this.getSimplifiedListItemNodes(this.parseTree.rootBlockNodes[0].listItemNodes),
+					},
+				],
+			};
+		},
 		htmlChunks() { // chunks include engram links.
 			if (this.htmlChunksFromThisComponent) {
 				return this.htmlChunksFromThisComponent;
 			}
 
-			let cryptarch = new Cryptarch();
-			const tree = cryptarch.getParseTree(this.blockContent);
-			cryptarch = null;
+			// let cryptarch = new Cryptarch();
+			// const tree = cryptarch.getParseTree(this.blockContent);
+			// cryptarch = null;
 
-			if (tree.rootBlockNodes.length === 0) {
+			if (this.parseTree.rootBlockNodes.length === 0) {
 				return [''];
 			}
 
@@ -91,21 +100,58 @@ export default {
 			// 	return this.getHtmlChunksForImage(tree.rootBlockNodes[0]);
 			// }
 
-			if (tree.rootBlockNodes[0].type === 'paragraph') {
+			if (this.parseTree.rootBlockNodes[0].type === 'paragraph') {
 				return this.getHtmlChunksForParagraph();
 			}
 
-			if (tree.rootBlockNodes[0].type === 'unordered list' || tree.rootBlockNodes[0].type === 'ordered list') {
-				// return this.getHtmlChunksForParagraph();
-				return this.getHtmlChunksForList(tree.rootBlockNodes[0].listItemNodes);
-			}
+			// if (tree.rootBlockNodes[0].type === 'unordered list' || tree.rootBlockNodes[0].type === 'ordered list') {
+			// 	return this.getHtmlChunksForParagraph();
+			// 	// return this.getHtmlChunksForList(tree.rootBlockNodes[0].listItemNodes);
+			// }
 
-			console.log(tree.rootBlockNodes[0]);
+			// console.log(tree.rootBlockNodes[0]);
 
-			return this.getHtmlChunksForRemainingBlocksWithBlockMarker(tree.rootBlockNodes[0].textNodes);
+			return this.getHtmlChunksForBlocksWithBlockMarker(this.parseTree.rootBlockNodes[0].textNodes);
 		},
 	},
 	methods: {
+		getSimplifiedListItemNodes(originalListItemNodes) { // for list
+			const simplifiedListItemNodes = [];
+
+			originalListItemNodes.forEach((originalListItemNode) => {
+				const simplifiedListItemNode = { title: originalListItemNode.type };
+
+				if ('textNodes' in originalListItemNode) {
+					simplifiedListItemNode.textNodes = [];
+
+					const listItemTextChunks = this.getJoinedText(originalListItemNode.textNodes).split(this.engramLinkRegex).filter((item) => item);
+
+					listItemTextChunks.forEach((listItemTextChunk) => {
+						if (this.engramLinkRegex.test(listItemTextChunk)) {
+							simplifiedListItemNode.textNodes.push(listItemTextChunk);
+						} else {
+							let cryptarch = new Cryptarch();
+							let listItemHtmlChunk = cryptarch.decrypt(listItemTextChunk);
+							cryptarch = null;
+
+							listItemHtmlChunk = listItemHtmlChunk.replace('<p>', '').replace(/<\/p>$/, '');
+
+							simplifiedListItemNode.textNodes.push(listItemHtmlChunk);
+						}
+					});
+				}
+
+				if ('listNode' in originalListItemNode) {
+					simplifiedListItemNode.listNode = this.getSimplifiedListItemNodes(originalListItemNode.listNode.listItemNodes);
+				}
+
+				simplifiedListItemNodes.push(simplifiedListItemNode);
+			});
+
+			console.log(simplifiedListItemNodes);
+
+			return simplifiedListItemNodes;
+		},
 		getHtmlChunksForParagraph() {
 			const textChunks = this.blockContent.split(this.engramLinkRegex).filter((item) => item);
 
@@ -126,43 +172,7 @@ export default {
 
 			return htmlChunks;
 		},
-		getHtmlChunksForList(listItemNodes) {
-			const htmlChunksForList = [];
-
-			listItemNodes.forEach((listItemNode) => {
-				// console.log(node);
-				const htmlChunksForListItem = { title: listItemNode.type };
-
-				if ('textNodes' in listItemNode) {
-					htmlChunksForListItem.textNodes = [];
-
-					const listItemTextChunks = this.getJoinedText(listItemNode.textNodes).split(this.engramLinkRegex).filter((item) => item);
-
-					listItemTextChunks.forEach((listItemTextChunk) => {
-						if (this.engramLinkRegex.test(listItemTextChunk)) {
-							htmlChunksForListItem.textNodes.push(listItemTextChunk);
-						} else {
-							let cryptarch = new Cryptarch();
-							let htmlChunk = cryptarch.decrypt(listItemTextChunk);
-							cryptarch = null;
-
-							htmlChunk = htmlChunk.replace('<p>', '').replace(/<\/p>$/, '');
-
-							htmlChunksForListItem.textNodes.push(htmlChunk);
-						}
-					});
-				}
-
-				if ('listNode' in listItemNode) {
-					htmlChunksForListItem.listNode = this.getHtmlChunksForList(listItemNode.listNode.listItemNodes);
-				}
-
-				htmlChunksForList.push(htmlChunksForListItem);
-			});
-
-			return htmlChunksForList;
-		},
-		getHtmlChunksForRemainingBlocksWithBlockMarker(textNodes) {
+		getHtmlChunksForBlocksWithBlockMarker(textNodes) {
 			const textChunks = this.getJoinedText(textNodes).split(this.engramLinkRegex).filter((item) => item);
 
 			const htmlChunks = [];
