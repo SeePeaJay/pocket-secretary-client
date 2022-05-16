@@ -16,7 +16,6 @@
 		:blockContent="$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex]"
 		@click="enterEditMode"
 	/>
-	<!-- v-if and v-else are required for custom VHtml component to work; consider alternative implementations -->
 </template>
 
 <script>

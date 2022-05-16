@@ -11,21 +11,16 @@
 				>
 					{{ getEngramTitle(chunk) }}
 				</router-link>
-				<!-- this commment is required for custom VHtml component to work; consider alternative implementations -->
-				<!-- <v-html v-else :html="chunk"></v-html> -->
 				<span v-else v-html="chunk"></span>
 			</template>
 		</component>
-		<!-- this commment is required for custom VHtml component to work; consider alternative implementations -->
-		<!-- <v-html v-else :html="html"></v-html> if image or line break -->
-		<p v-else-if="htmlTagName === 'img'" v-html="html"></p>
+		<p v-else-if="htmlTagName === 'img'" v-html="html"></p> <!-- make it <img></img> instead? -->
 		<hr v-else>
 	</div>
 </template>
 
 <script>
 import Cryptarch from '../cryptarch/cryptarch';
-// import Lexer from '../cryptarch/lexer';
 import { TREE_NODE_TYPES } from '../cryptarch/constants';
 import RenderedEngramList from './RenderedEngramList.vue';
 
@@ -36,7 +31,6 @@ export default {
 	},
 	props: {
 		blockContent: String,
-		htmlChunksFromThisComponent: Array,
   },
 	data() {
 		return {
@@ -77,7 +71,7 @@ export default {
 
 			return tree;
 		},
-		parseTreeForList() { // simplified for ...
+		parseTreeForList() { // simplified for rendering lists
 			return {
 				type: this.parseTree.type,
 				rootBlockNodes: [
@@ -88,39 +82,20 @@ export default {
 				],
 			};
 		},
-		htmlChunks() { // chunks include engram links.
-			if (this.htmlChunksFromThisComponent) {
-				return this.htmlChunksFromThisComponent;
-			}
-
-			// let cryptarch = new Cryptarch();
-			// const tree = cryptarch.getParseTree(this.blockContent);
-			// cryptarch = null;
-
+		htmlChunks() { // chunks include engram links
 			if (this.parseTree.rootBlockNodes.length === 0) {
 				return [''];
 			}
-
-			// if (tree.rootBlockNodes[0].type === 'image') {
-			// 	return this.getHtmlChunksForImage(tree.rootBlockNodes[0]);
-			// }
 
 			if (this.parseTree.rootBlockNodes[0].type === 'paragraph') {
 				return this.getHtmlChunksForParagraph();
 			}
 
-			// if (tree.rootBlockNodes[0].type === 'unordered list' || tree.rootBlockNodes[0].type === 'ordered list') {
-			// 	return this.getHtmlChunksForParagraph();
-			// 	// return this.getHtmlChunksForList(tree.rootBlockNodes[0].listItemNodes);
-			// }
-
-			// console.log(tree.rootBlockNodes[0]);
-
 			return this.getHtmlChunksForBlocksWithBlockMarker(this.parseTree.rootBlockNodes[0].textNodes);
 		},
 	},
 	methods: {
-		getSimplifiedListItemNodes(originalListItemNodes) { // for list
+		getSimplifiedListItemNodes(originalListItemNodes) { // used by parseTreeForList
 			const simplifiedListItemNodes = [];
 
 			originalListItemNodes.forEach((originalListItemNode) => {
@@ -162,8 +137,8 @@ export default {
 		},
 		getHtmlChunksForParagraph() {
 			const textChunks = this.blockContent.split(this.engramLinkRegex).filter((item) => item);
-
 			const htmlChunks = [];
+
 			textChunks.forEach((textChunk) => {
 				if (this.engramLinkRegex.test(textChunk)) {
 					htmlChunks.push(textChunk);
@@ -182,8 +157,8 @@ export default {
 		},
 		getHtmlChunksForBlocksWithBlockMarker(textNodes) {
 			const textChunks = this.getJoinedText(textNodes).split(this.engramLinkRegex).filter((item) => item);
-
 			const htmlChunks = [];
+
 			textChunks.forEach((textChunk) => {
 				if (this.engramLinkRegex.test(textChunk)) {
 					htmlChunks.push(textChunk);
@@ -202,6 +177,7 @@ export default {
 		},
 		getJoinedText(textNodes) {
 			let text = '';
+
 			textNodes.forEach((node) => {
 				switch (node.type) {
 					case TREE_NODE_TYPES.boldText:

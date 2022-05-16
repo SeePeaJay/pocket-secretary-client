@@ -9,8 +9,6 @@
 					>
 						{{ getEngramTitle(textNode) }}
 					</router-link>
-					<!-- this commment is required for custom VHtml component to work; consider alternative implementations -->
-					<!-- <v-html v-else :html="textNode"></v-html> -->
 					<span v-else v-html="textNode"></span>
 				</template>
 				<RenderedEngramList
@@ -22,21 +20,6 @@
 			</li>
 		</template>
 	</component>
-	<!-- <li v-if="htmlTagName === 'ul' || htmlTagName === 'ol'">
-		<template v-for="(listItemChunk, listItemChunkIndex) in htmlChunk.textNodes" :key="listItemChunkIndex">
-			<router-link
-				v-if="engramLinkRegex.test(listItemChunk)"
-				:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(listItemChunk) }}"
-			>
-				{{ getEngramTitle(listItemChunk) }}
-			</router-link>
-			<v-html v-else :html="listItemChunk"></v-html>
-		</template>
-		<RenderedEngramBlock
-			v-if="'listNode' in htmlChunks[index]"
-			:htmlChunksFromThisComponent="htmlChunks[index].listNode"
-		/>
-	</li> -->
 </template>
 
 <script>
