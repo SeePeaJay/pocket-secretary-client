@@ -10,7 +10,8 @@
 						{{ getEngramTitle(textNode) }}
 					</router-link>
 					<!-- this commment is required for custom VHtml component to work; consider alternative implementations -->
-					<v-html v-else :html="textNode"></v-html>
+					<!-- <v-html v-else :html="textNode"></v-html> -->
+					<span v-else v-html="textNode"></span>
 				</template>
 				<RenderedEngramList
 					v-if="'listNode' in listItemNode"

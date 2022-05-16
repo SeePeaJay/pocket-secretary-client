@@ -12,11 +12,14 @@
 					{{ getEngramTitle(chunk) }}
 				</router-link>
 				<!-- this commment is required for custom VHtml component to work; consider alternative implementations -->
-				<v-html v-else :html="chunk"></v-html>
+				<!-- <v-html v-else :html="chunk"></v-html> -->
+				<span v-else v-html="chunk"></span>
 			</template>
 		</component>
 		<!-- this commment is required for custom VHtml component to work; consider alternative implementations -->
-		<v-html v-else :html="html"></v-html> <!-- if image or line break -->
+		<!-- <v-html v-else :html="html"></v-html> if image or line break -->
+		<p v-else-if="htmlTagName === 'img'" v-html="html"></p>
+		<hr v-else>
 	</div>
 </template>
 
