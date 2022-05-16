@@ -1,9 +1,9 @@
 <template>
 	<div class="test"> <!-- div to make block clickable -->
-		<!-- <RenderedEngramList v-if="htmlTagName === 'ul' || htmlTagName === 'ol'"
+		<RenderedEngramList v-if="htmlTagName === 'ul' || htmlTagName === 'ol'"
 			:ulOrOl="htmlTagName" :listNode="parseTreeForList.rootBlockNodes[0]" :engramLinkRegex="engramLinkRegex"
-		/> -->
-		<component v-if="isTextualBlock" :is="htmlTagName"> <!-- if not list, image, or line break -->
+		/>
+		<component v-else-if="isTextualBlock" :is="htmlTagName"> <!-- if not list, image, or line break -->
 			<template v-for="(chunk, index) in htmlChunks" :key="index">
 				<router-link
 					v-if="engramLinkRegex.test(chunk)"
@@ -11,9 +11,11 @@
 				>
 					{{ getEngramTitle(chunk) }}
 				</router-link>
+				<!-- this commment is required for custom VHtml component to work; consider alternative implementations -->
 				<v-html v-else :html="chunk"></v-html>
 			</template>
 		</component>
+		<!-- this commment is required for custom VHtml component to work; consider alternative implementations -->
 		<v-html v-else :html="html"></v-html> <!-- if image or line break -->
 	</div>
 </template>
@@ -36,7 +38,7 @@ export default {
 	data() {
 		return {
 			componentKey: 0,
-			engramLinkRegex: /(\*(?:.|\n(?! *\n)(?! *\d{0,9}\.))+{})/, // bracket to include delimiter in result after split
+			engramLinkRegex: /(\*(?:.|\n(?! *\n)(?! *\d{0,9}\.))+?{})/, // bracket to include delimiter in result after split
 		};
 	},
 	computed: {
@@ -142,7 +144,10 @@ export default {
 				}
 
 				if ('listNode' in originalListItemNode) {
-					simplifiedListItemNode.listNode = this.getSimplifiedListItemNodes(originalListItemNode.listNode.listItemNodes);
+					simplifiedListItemNode.listNode = {
+						type: originalListItemNode.listNode.type,
+						listItemNodes: this.getSimplifiedListItemNodes(originalListItemNode.listNode.listItemNodes),
+					};
 				}
 
 				simplifiedListItemNodes.push(simplifiedListItemNode);

@@ -9,12 +9,14 @@
 					>
 						{{ getEngramTitle(textNode) }}
 					</router-link>
+					<!-- this commment is required for custom VHtml component to work; consider alternative implementations -->
 					<v-html v-else :html="textNode"></v-html>
 				</template>
 				<RenderedEngramList
 					v-if="'listNode' in listItemNode"
-					:ulOrOl="listItemNode.listNode.type"
+					:ulOrOl="getUlOrOl(listItemNode.listNode)"
 					:listNode="listItemNode.listNode"
+					:engramLinkRegex="engramLinkRegex"
 				/>
 			</li>
 		</template>
@@ -45,6 +47,13 @@ export default {
 		engramLinkRegex: RegExp,
 	},
 	methods: {
+		getUlOrOl(listNode) {
+			if (listNode.type === 'unordered list') {
+				return 'ul';
+			}
+
+			return 'ol';
+		},
 		getEngramTitle(engramLink) { // duplicated method from parent component; consider improvements
 			return engramLink.slice(1, -2);
 		},
