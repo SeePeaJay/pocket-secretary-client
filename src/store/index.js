@@ -58,6 +58,7 @@ export default createStore({
 		REMOVE_ENGRAM_BLOCK(state, { engramTitle, blockIndex }) {
 			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks.splice(blockIndex, 1);
 		},
+		// ADD_ENGRAM
   },
   actions: {
 		setAbortController() {
@@ -153,6 +154,7 @@ export default createStore({
 				}
 			}
 		},
+		// createEngram
   },
   modules: {
   },
