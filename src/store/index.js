@@ -25,6 +25,12 @@ export default createStore({
 		SET_USERNAME(state, serverUsername) {
 			state.username = serverUsername;
 		},
+		ADD_ENGRAM(state, engramTitle) {
+			state.engrams.push({
+				title: engramTitle,
+				rootBlocks: [`* ${engramTitle}`],
+			});
+		},
 		SET_ENGRAMS(state, serverEngramTitles) { // the content needs to be decoded first, then parsed into rootBlocks.
 			state.engrams = serverEngramTitles.map((serverEngramTitle) => ({
 					title: serverEngramTitle,
@@ -58,7 +64,6 @@ export default createStore({
 		REMOVE_ENGRAM_BLOCK(state, { engramTitle, blockIndex }) {
 			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks.splice(blockIndex, 1);
 		},
-		// ADD_ENGRAM
   },
   actions: {
 		setAbortController() {
@@ -154,7 +159,12 @@ export default createStore({
 				}
 			}
 		},
-		// createEngram
+		async createEngram({ commit, dispatch }, engramTitle) {
+			commit('ADD_ENGRAM', engramTitle);
+
+			// call axios to save newly created engram to Github
+			dispatch('putEngram', engramTitle);
+		},
   },
   modules: {
   },

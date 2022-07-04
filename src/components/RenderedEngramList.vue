@@ -3,12 +3,13 @@
 		<template v-for="(listItemNode, listItemNodeIndex) in listNode.listItemNodes" :key="listItemNodeIndex">
 			<li>
 				<template v-for="(textNode, textNodeIndex) in listItemNode.textNodes" :key="textNodeIndex">
-					<router-link
+					<!-- <router-link
 						v-if="engramLinkRegex.test(textNode)"
 						:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(textNode) } }"
 					>
 						{{ getEngramTitle(textNode) }}
-					</router-link>
+					</router-link> -->
+					<EngramLink v-if="engramLinkRegex.test(textNode)" :engramTitle="getEngramTitle(textNode)" />
 					<span v-else v-html="textNode"></span>
 				</template>
 				<RenderedEngramList
@@ -23,8 +24,13 @@
 </template>
 
 <script>
+import EngramLink from './EngramLink.vue';
+
 export default {
 	name: 'RenderedEngramList',
+	components: {
+		EngramLink,
+	},
 	props: {
 		ulOrOl: String,
 		listNode: Object,

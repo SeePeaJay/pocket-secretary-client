@@ -5,12 +5,13 @@
 		/>
 		<component v-else-if="isTextualBlock" :is="htmlTagName"> <!-- if not list, image, or line break -->
 			<template v-for="(chunk, index) in htmlChunks" :key="index">
-				<router-link
+				<!-- <router-link
 					v-if="engramLinkRegex.test(chunk)"
 					:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(chunk) } }"
 				>
 					{{ getEngramTitle(chunk) }}
-				</router-link>
+				</router-link> -->
+				<EngramLink v-if="engramLinkRegex.test(chunk)" :engramTitle="getEngramTitle(chunk)" />
 				<span v-else v-html="chunk"></span>
 			</template>
 		</component>
@@ -23,11 +24,13 @@
 import Cryptarch from '../cryptarch/cryptarch';
 import { TREE_NODE_TYPES } from '../cryptarch/constants';
 import RenderedEngramList from './RenderedEngramList.vue';
+import EngramLink from './EngramLink.vue';
 
 export default {
 	name: 'RenderedEngramBlock',
 	components: {
 		RenderedEngramList,
+		EngramLink,
 	},
 	props: {
 		blockContent: String,
@@ -60,7 +63,7 @@ export default {
 			const html = cryptarch.decrypt(this.blockContent);
 			cryptarch = null; // is there a better way to prevent memory leak than this?
 
-			console.log(html);
+			// console.log(html);
 
 			return html;
 		},
@@ -131,7 +134,7 @@ export default {
 				simplifiedListItemNodes.push(simplifiedListItemNode);
 			});
 
-			console.log(simplifiedListItemNodes);
+			// console.log(simplifiedListItemNodes);
 
 			return simplifiedListItemNodes;
 		},
@@ -211,7 +214,7 @@ export default {
 
 			return text;
 		},
-		getEngramTitle(engramLink) {
+		getEngramTitle(engramLink) { // remove * and {}
 			return engramLink.slice(1, -2);
 		},
 	},
