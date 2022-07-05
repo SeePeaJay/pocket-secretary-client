@@ -27,7 +27,7 @@ export default {
 			this.SET_LAST_COMMITTED_ENGRAM_DATA(this.engramTitle);
 		});
 	},
-	beforeRouteLeave(to, from, next) { // this won't execute during refresh called when the route that renders this component is about to be navigated away from.
+	beforeRouteLeave(to, from, next) { // won't execute during refresh; only called when the route that renders this component is about to be navigated away from.
 		console.log(`On first line of before route leave in ${from.name} ...`);
 		this.cancelPreviousRequest().then(() => {
 			next();

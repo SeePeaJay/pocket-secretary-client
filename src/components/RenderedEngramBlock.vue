@@ -1,22 +1,18 @@
 <template>
 	<div class="test"> <!-- div to make block clickable -->
-		<RenderedEngramList v-if="htmlTagName === 'ul' || htmlTagName === 'ol'"
+		<RenderedEngramList
+			v-if="htmlTagName === 'ul' || htmlTagName === 'ol'"
 			:ulOrOl="htmlTagName" :listNode="parseTreeForList.rootBlockNodes[0]" :engramLinkRegex="engramLinkRegex"
+			@enterEditMode="$emit('enterEditMode')"
 		/>
 		<component v-else-if="isTextualBlock" :is="htmlTagName"> <!-- if not list, image, or line break -->
 			<template v-for="(chunk, index) in htmlChunks" :key="index">
-				<!-- <router-link
-					v-if="engramLinkRegex.test(chunk)"
-					:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(chunk) } }"
-				>
-					{{ getEngramTitle(chunk) }}
-				</router-link> -->
 				<EngramLink v-if="engramLinkRegex.test(chunk)" :engramTitle="getEngramTitle(chunk)" />
-				<span v-else v-html="chunk"></span>
+				<span v-else @click="$emit('enterEditMode')" v-html="chunk"></span>
 			</template>
 		</component>
-		<p v-else-if="htmlTagName === 'img'" v-html="html"></p> <!-- make it <img></img> instead? -->
-		<hr v-else>
+		<p v-else-if="htmlTagName === 'img'" @click="$emit('enterEditMode')" v-html="html"></p> <!-- TODO: make it <img></img> instead? -->
+		<hr v-else @click="$emit('enterEditMode')">
 	</div>
 </template>
 

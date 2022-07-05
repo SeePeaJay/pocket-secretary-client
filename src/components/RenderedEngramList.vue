@@ -3,20 +3,15 @@
 		<template v-for="(listItemNode, listItemNodeIndex) in listNode.listItemNodes" :key="listItemNodeIndex">
 			<li>
 				<template v-for="(textNode, textNodeIndex) in listItemNode.textNodes" :key="textNodeIndex">
-					<!-- <router-link
-						v-if="engramLinkRegex.test(textNode)"
-						:to="{ name: 'Engram', params: { engramTitle: getEngramTitle(textNode) } }"
-					>
-						{{ getEngramTitle(textNode) }}
-					</router-link> -->
 					<EngramLink v-if="engramLinkRegex.test(textNode)" :engramTitle="getEngramTitle(textNode)" />
-					<span v-else v-html="textNode"></span>
+					<span v-else @click="$emit('enterEditMode')" v-html="textNode"></span>
 				</template>
 				<RenderedEngramList
 					v-if="'listNode' in listItemNode"
 					:ulOrOl="getUlOrOl(listItemNode.listNode)"
 					:listNode="listItemNode.listNode"
 					:engramLinkRegex="engramLinkRegex"
+					@enterEditMode="$emit('enterEditMode')"
 				/>
 			</li>
 		</template>

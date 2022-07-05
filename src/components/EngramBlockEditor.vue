@@ -14,7 +14,7 @@
 	<RenderedEngramBlock
 		v-else
 		:blockContent="$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex]"
-		@click="enterEditMode"
+		@enterEditMode="enterEditMode()"
 	/>
 </template>
 

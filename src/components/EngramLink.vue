@@ -28,7 +28,7 @@ export default {
 			await this.$store.dispatch('createEngram', this.engramTitle);
 
 			// test
-			console.log(this.$store.state.engrams);
+			// console.log(this.$store.state.engrams);
 
 			// go to the actual link programmatically
 			this.$router.push({ name: 'Engram', params: { engramTitle: this.engramTitle } });
