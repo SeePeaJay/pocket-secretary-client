@@ -82,8 +82,8 @@ export default createStore({
 			}
 
 			putEngramRequest = setTimeout(() => {
-				dispatch('putEngram', engramTitle);
-				commit('SET_LAST_COMMITTED_ENGRAM_DATA', engramTitle);
+				dispatch('putEngram', { engramTitle, engramIsNew: false });
+				commit('SET_LAST_COMMITTED_ENGRAM_DATA', engramTitle); // assume only one file can be updated at one time
 			}, 1500);
 		},
 		async fetchUser({ commit, state }) {
@@ -143,13 +143,13 @@ export default createStore({
 				}
 			}
 		},
-		async putEngram({ state }, engramTitle) {
+		async putEngram({ state }, { engramTitle, engramIsNew }) {
 			try {
 				const matchedEngram = state.engrams.find((engram) => engram.title === engramTitle);
 				const engramContent = matchedEngram.rootBlocks.join('\n\n');
 
 				await axios.put('http://localhost:3000/engram',
-					{ engramTitle, engramContent },
+					{ engramTitle, engramContent, engramIsNew },
 					{ withCredentials: true, signal: abortController.signal });
 			} catch (error) {
 				if (axios.isCancel(error)) {
@@ -163,7 +163,7 @@ export default createStore({
 			commit('ADD_ENGRAM', engramTitle);
 
 			// call axios to save newly created engram to Github
-			dispatch('putEngram', engramTitle);
+			await dispatch('putEngram', { engramTitle, engramIsNew: true });
 		},
   },
   modules: {
