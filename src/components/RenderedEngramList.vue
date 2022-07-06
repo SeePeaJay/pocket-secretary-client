@@ -3,15 +3,18 @@
 		<template v-for="(listItemNode, listItemNodeIndex) in listNode.listItemNodes" :key="listItemNodeIndex">
 			<li>
 				<template v-for="(textNode, textNodeIndex) in listItemNode.textNodes" :key="textNodeIndex">
-					<EngramLink v-if="engramLinkRegex.test(textNode)" :engramTitle="getEngramTitle(textNode)" />
-					<span v-else @click="$emit('enterEditMode')" v-html="textNode"></span>
+					<EngramLink
+						v-if="engramLinkRegex.test(textNode)"
+						:engramTitle="getEngramTitle(textNode)"
+						@click="stopPropagation($event)"
+					/>
+					<span v-else v-html="textNode"></span>
 				</template>
 				<RenderedEngramList
 					v-if="'listNode' in listItemNode"
 					:ulOrOl="getUlOrOl(listItemNode.listNode)"
 					:listNode="listItemNode.listNode"
 					:engramLinkRegex="engramLinkRegex"
-					@enterEditMode="$emit('enterEditMode')"
 				/>
 			</li>
 		</template>
@@ -41,6 +44,9 @@ export default {
 		},
 		getEngramTitle(engramLink) { // duplicated method from parent component; consider improvements
 			return engramLink.slice(1, -2);
+		},
+		stopPropagation(event) {
+			event.stopPropagation();
 		},
 	},
 };

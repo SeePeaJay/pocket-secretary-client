@@ -41,7 +41,7 @@ export default {
 /* empty link appearance: cursor, underline, and dark blue*/
 .placeholder {
 	text-decoration: underline;
-	color: red;
+	color: gray;
 	cursor: pointer;
 }
 </style>

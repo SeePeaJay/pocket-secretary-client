@@ -3,16 +3,17 @@
 		<RenderedEngramList
 			v-if="htmlTagName === 'ul' || htmlTagName === 'ol'"
 			:ulOrOl="htmlTagName" :listNode="parseTreeForList.rootBlockNodes[0]" :engramLinkRegex="engramLinkRegex"
-			@enterEditMode="$emit('enterEditMode')"
 		/>
 		<component v-else-if="isTextualBlock" :is="htmlTagName"> <!-- if not list, image, or line break -->
 			<template v-for="(chunk, index) in htmlChunks" :key="index">
-				<EngramLink v-if="engramLinkRegex.test(chunk)" :engramTitle="getEngramTitle(chunk)" />
-				<span v-else @click="$emit('enterEditMode')" v-html="chunk"></span>
+				<EngramLink
+					v-if="engramLinkRegex.test(chunk)" :engramTitle="getEngramTitle(chunk)" @click="stopPropagation($event)"
+				/>
+				<span v-else v-html="chunk"></span>
 			</template>
 		</component>
-		<p v-else-if="htmlTagName === 'img'" @click="$emit('enterEditMode')" v-html="html"></p> <!-- TODO: make it <img></img> instead? -->
-		<hr v-else @click="$emit('enterEditMode')">
+		<p v-else-if="htmlTagName === 'img'" v-html="html"></p> <!-- TODO: make it <img></img> instead? -->
+		<hr v-else>
 	</div>
 </template>
 
@@ -212,6 +213,9 @@ export default {
 		},
 		getEngramTitle(engramLink) { // remove * and {}
 			return engramLink.slice(1, -2);
+		},
+		stopPropagation(event) {
+			event.stopPropagation();
 		},
 	},
 };
