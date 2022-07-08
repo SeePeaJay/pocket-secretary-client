@@ -1,6 +1,8 @@
 <template>
-	<p v-if="isLoggedIn">User authenticated</p>
+	<p v-if="userIsLoggedIn()">User authenticated</p>
 	<p v-else>User not authenticated</p>
+	<!-- <EngramEditor v-if="isLoggedIn" engram-title="Starred"/>
+	<EngramEditor v-else default-engram-content=""/> -->
 </template>
 
 <script>
@@ -12,10 +14,10 @@ export default {
 	// components: {
 	// 	EngramEditor,
   // },
-	computed: {
-		isLoggedIn() {
-			return !!this.$store.state.username;
-		},
+	data() {
+		return {
+			defaultEngramBlocks: ['* Default Engram Page'],
+		};
 	},
 	methods: {
 		...mapActions(['fetchUser']),
