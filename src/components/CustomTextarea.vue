@@ -20,6 +20,7 @@ export default {
 	name: 'CustomTextarea',
 	props: {
 		engramTitle: String,
+		blockContent: String,
 		customTextareaIndex: Number,
 		isExitingEditModeByEnterOrDeleteKey: Boolean,
 	},
@@ -27,7 +28,7 @@ export default {
 	computed: {
 		textareaContent: {
 			get() {
-				return this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.customTextareaIndex];
+				return this.blockContent;
 			},
 			set(value) {
 				const payload = {

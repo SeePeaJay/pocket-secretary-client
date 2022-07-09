@@ -4,6 +4,7 @@
 		ref="customTextarea"
 		:engram-title="engramTitle"
 		:custom-textarea-index="blockIndex"
+		:block-content="blockContent"
 		:is-exiting-edit-mode-by-enter-or-delete-key="isExitingEditModeByEnterOrDeleteKey"
 		@exit-edit-mode="exitEditMode"
 		@edit-previous-block="editPreviousBlock"
@@ -31,6 +32,7 @@ export default {
 	props: {
 		engramTitle: String,
 		blockIndex: Number,
+		blockContent: String,
 		isEditable: Boolean,
   },
 	emits: ['editNextBlock', 'editPreviousBlock', 'createAndEditNextBlock', 'deleteCurrentAndEditPreviousBlock'],
@@ -39,15 +41,6 @@ export default {
 			isOnEditMode: false,
 			isExitingEditModeByEnterOrDeleteKey: false,
 		};
-	},
-	computed: {
-		blockContent() {
-			if (this.userIsLoggedIn()) {
-				return this.$store.state.engrams.find((engram) => engram.title === this.engramTitle).rootBlocks[this.blockIndex];
-			}
-
-			return 'dog';
-		},
 	},
 	methods: {
 		userIsLoggedIn() { // TODO: refactor when all components use Composition API

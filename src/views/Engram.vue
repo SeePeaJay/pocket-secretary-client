@@ -1,5 +1,5 @@
 <template>
-	<EngramEditor :engram-title="engramTitle"/>
+	<EngramEditor :engram-title="engramTitle" isEditable />
 </template>
 
 <script>

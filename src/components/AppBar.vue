@@ -25,6 +25,7 @@ export default {
 		},
 		async login() {
 			console.log('oopsie');
+			// create Starred engram if it doesn't exist
 		},
 		async logout() {
 			try {

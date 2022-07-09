@@ -4,8 +4,9 @@
 			<EngramBlockEditor
 				v-for="(engramBlock, index) in engramBlocks" :key="index"
 				:ref="el => { if (el) engramBlockEditors[index] = el }"
-				:block-index="index"
 				:engram-title="engramTitle"
+				:block-index="index"
+				:block-content="engramBlock"
 				:is-editable="isEditable"
 				@edit-previous-block="editPreviousBlock"
 				@edit-next-block="editNextBlock"

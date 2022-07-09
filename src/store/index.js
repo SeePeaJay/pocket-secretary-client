@@ -14,11 +14,12 @@ export default createStore({
   },
 	getters: {
 		engramRootBlocks: (state) => (engramTitle) => {
-			const foundEngram = state.engrams.find((engram) => engram.title === engramTitle);
-			if (foundEngram) {
-				return state.engrams.find((engram) => engram.title === engramTitle).rootBlocks;
-			}
-			return [];
+			// const foundEngram = state.engrams.find((engram) => engram.title === engramTitle);
+			// if (foundEngram) {
+			// 	return state.engrams.find((engram) => engram.title === engramTitle).rootBlocks;
+			// }
+			// return [];
+			return state.engrams.find((engram) => engram.title === engramTitle).rootBlocks;
 		},
 	},
   mutations: {
@@ -76,7 +77,7 @@ export default createStore({
 				abortController.abort();
 			}
 		},
-		setPutEngramRequestAndLastCommittedEngramData({ commit, dispatch }, engramTitle) {
+		setPutEngramRequestAndLastCommittedEngramData({ commit, dispatch }, engramTitle) { // TODO: add async/await?
 			if (putEngramRequest) {
 				clearTimeout(putEngramRequest);
 			}
