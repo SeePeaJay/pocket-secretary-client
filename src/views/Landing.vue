@@ -1,26 +1,31 @@
 <template>
 	<p v-if="userIsLoggedIn()">User authenticated</p>
-	<p v-else>User not authenticated</p>
-	<!-- <EngramEditor v-if="isLoggedIn" engram-title="Starred"/>
-	<EngramEditor v-else default-engram-content=""/> -->
+	<!-- <p v-else>User not authenticated</p> -->
+	<!-- <EngramEditor v-if="isLoggedIn" engram-title="Starred"/> -->
+	<EngramEditor
+		v-else engram-title="Default Engram Page" :unauthenticated-engram-blocks="unauthenticatedEngramBlocks"
+	/>
 </template>
 
 <script>
-// import EngramEditor from '../components/EngramEditor.vue';
 import { mapActions } from 'vuex';
+import EngramEditor from '../components/EngramEditor.vue';
 
 export default {
 	name: 'Landing',
-	// components: {
-	// 	EngramEditor,
-  // },
+	components: {
+		EngramEditor,
+  },
 	data() {
 		return {
-			defaultEngramBlocks: ['* Default Engram Page'],
+			unauthenticatedEngramBlocks: ['* Default Engram Page'],
 		};
 	},
 	methods: {
 		...mapActions(['fetchUser']),
+		userIsLoggedIn() { // TODO: refactor when all components use Composition API
+			return !!this.$store.state.username;
+		},
 	},
 	created() {
 		this.fetchUser().then(() => {

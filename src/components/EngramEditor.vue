@@ -4,8 +4,9 @@
 			<EngramBlockEditor
 				v-for="(engramBlock, index) in engramBlocks" :key="index"
 				:ref="el => { if (el) engramBlockEditors[index] = el }"
-				:engram-title="engramTitle"
 				:block-index="index"
+				:engram-title="engramTitle"
+				:is-editable="isEditable"
 				@edit-previous-block="editPreviousBlock"
 				@edit-next-block="editNextBlock"
 				@create-and-edit-next-block="createAndEditNextBlock"
@@ -29,12 +30,21 @@ export default {
 	},
   props: {
 		engramTitle: String,
+		unauthenticatedEngramBlocks: Array,
+		isEditable: Boolean,
   },
 	setup(props) {
 		const store = useStore();
 
 		const engramBlockEditors = ref([]);
-		const engramBlocks = computed(() => store.getters.engramRootBlocks(props.engramTitle));
+		const userIsLoggedIn = () => !!store.state.username; // TODO: refactor when all components use Composition API
+		const engramBlocks = computed(() => {
+			if (userIsLoggedIn()) {
+				return store.getters.engramRootBlocks(props.engramTitle);
+			}
+
+			return props.unauthenticatedEngramBlocks;
+		});
 
 		function editPreviousBlock(currentBlockIndex, contentForPreviousBlock = null) {
 			const previousBlockIndex = currentBlockIndex - 1;

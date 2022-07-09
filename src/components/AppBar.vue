@@ -20,6 +20,9 @@ export default {
 	name: 'AppBar',
 	methods: {
 		...mapMutations(['SET_USERNAME', 'SET_ENGRAMS']),
+		userIsLoggedIn() { // TODO: refactor when all components use Composition API
+			return !!this.$store.state.username;
+		},
 		async login() {
 			console.log('oopsie');
 		},
