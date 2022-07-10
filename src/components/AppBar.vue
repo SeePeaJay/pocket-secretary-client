@@ -1,8 +1,9 @@
 <template>
 	<nav>
-		<router-link to="/engrams">
+		<router-link v-if="userIsLoggedIn()" to="/engrams">
 			<img src="../assets/stack-2.svg" alt="tabler stack-2 icon" />
 		</router-link>
+		<span v-else></span> <!-- a quick hack for fixing the login button in place when unauthed-->
 		<a v-if="userIsLoggedIn()" @click="logout()">
 			<img src="../assets/logout.svg" alt="tabler logout icon" />
 		</a>
@@ -59,7 +60,7 @@ nav {
 	justify-content: space-between;
 }
 
-nav > * {
+nav > :not(span) {
 	width: 24px;
 	height: 24px;
 	filter: invert(67%) sepia(0%) saturate(261%) hue-rotate(157deg) brightness(88%) contrast(79%); /* = #919191 */
