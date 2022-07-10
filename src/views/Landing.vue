@@ -1,14 +1,14 @@
 <template>
-	<p v-if="userIsLoggedIn()">User authenticated</p>
-	<!-- <p v-else>User not authenticated</p> -->
-	<!-- <EngramEditor v-if="isLoggedIn" engram-title="Starred" isEditable/> -->
+	<!-- <p v-if="userIsLoggedIn()">User authenticated</p>
+	<p v-else>User not authenticated</p> -->
+	<EngramEditor v-if="userIsLoggedIn()" engram-title="Starred" isEditable/>
 	<EngramEditor
 		v-else engram-title="Default Engram Page" :unauthenticated-engram-blocks="unauthenticatedEngramBlocks"
 	/>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapMutations, mapActions } from 'vuex';
 import EngramEditor from '../components/EngramEditor.vue';
 
 export default {
@@ -22,15 +22,29 @@ export default {
 		};
 	},
 	methods: {
-		...mapActions(['fetchUser']),
+		...mapMutations(['SET_LAST_COMMITTED_ENGRAM_DATA']),
+		...mapActions(['setAbortController', 'fetchUser', 'fetchEngram', 'createEngram']),
 		userIsLoggedIn() { // TODO: refactor when all components use Composition API
 			return !!this.$store.state.username;
 		},
 	},
 	created() {
-		this.fetchUser().then(() => {
-			console.log(`In creation of Landing, user is: ${this.$store.state.username}`);
-		}); // seems like setting the abort controller is not needed here? perhaps because it doesn't request for more in the backend?
+		this.setAbortController().then(() => {
+			this.fetchUser().then(() => {
+				console.log(`In creation of Landing, user is: ${this.$store.state.username}`);
+
+				if (this.userIsLoggedIn()) {
+					const engramTitles = this.$store.state.engrams.map((engram) => engram.title);
+
+					if (!engramTitles.includes('Starred')) {
+						this.createEngram('Starred');
+						this.SET_LAST_COMMITTED_ENGRAM_DATA('Starred');
+					}
+
+					this.fetchEngram('Starred');
+				}
+			});
+		});
 
 		// this.setAbortController().then((value) => {
 		// 	console.log(`At creation of Engrams. And right after setting the abort controller, it should be ${value}`);

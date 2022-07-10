@@ -3,7 +3,7 @@
 		<router-link to="/engrams">
 			<img src="../assets/stack-2.svg" alt="tabler stack-2 icon" />
 		</router-link>
-		<a v-if="userIsLoggedIn()" @click="logout">
+		<a v-if="userIsLoggedIn()" @click="logout()">
 			<img src="../assets/logout.svg" alt="tabler logout icon" />
 		</a>
 		<a v-else href="/auth/github">
@@ -24,7 +24,16 @@ export default {
 			return !!this.$store.state.username;
 		},
 		async login() {
-			console.log('oopsie');
+			try {
+				await axios.get('http://localhost:3000/login', {}, { withCredentials: true }); // TODO: axios relative url
+
+				// this.SET_USERNAME('');
+				// this.SET_ENGRAMS([]);
+				// this.$router.push('/');
+				// console.log(this.$store.state.username);
+			} catch (error) {
+				console.error(error);
+			}
 			// create Starred engram if it doesn't exist
 		},
 		async logout() {

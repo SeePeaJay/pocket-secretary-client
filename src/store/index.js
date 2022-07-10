@@ -82,8 +82,8 @@ export default createStore({
 				clearTimeout(putEngramRequest);
 			}
 
-			putEngramRequest = setTimeout(() => {
-				dispatch('putEngram', { engramTitle, engramIsNew: false });
+			putEngramRequest = setTimeout(async () => {
+				await dispatch('putEngram', { engramTitle, engramIsNew: false });
 				commit('SET_LAST_COMMITTED_ENGRAM_DATA', engramTitle); // assume only one file can be updated at one time
 			}, 1500);
 		},
@@ -92,8 +92,10 @@ export default createStore({
 				const response = await axios.get('http://localhost:3000/', { withCredentials: true });
 
 				if (response.data && !state.username) {
-					commit('SET_USERNAME', response.data);
+					commit('SET_USERNAME', response.data.username);
+					commit('SET_ENGRAMS', response.data.engramTitles);
 				} else if (!response.data) {
+					console.log(response.data);
 					console.log('Cannot fetch user; user is not authenticated.');
 				}
 			} catch (error) {
@@ -106,7 +108,7 @@ export default createStore({
 
 				if (state.engrams.length === 0) {
 					commit('SET_ENGRAMS', response.data);
-				} else {
+				} else { // TODO: don't think we need to check for list of engram once logged in?
 					const stateEngramTitles = state.engrams.map((stateEngram) => stateEngram.title);
 
 					if (JSON.stringify(stateEngramTitles) !== JSON.stringify(response.data)) {
@@ -148,6 +150,8 @@ export default createStore({
 			try {
 				const matchedEngram = state.engrams.find((engram) => engram.title === engramTitle);
 				const engramContent = matchedEngram.rootBlocks.join('\n\n');
+
+				console.log('somebody called this before fk up');
 
 				await axios.put('http://localhost:3000/engram',
 					{ engramTitle, engramContent, engramIsNew },
