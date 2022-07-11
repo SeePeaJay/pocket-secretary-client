@@ -26,6 +26,12 @@ export default createStore({
 		SET_USERNAME(state, serverUsername) {
 			state.username = serverUsername;
 		},
+		SET_ALL_ENGRAMS(state, allEngramsTitleAndContent) {
+			state.engrams = allEngramsTitleAndContent.map((engramTitleAndContent) => ({
+				title: engramTitleAndContent.title,
+				rootBlocks: Buffer.from(engramTitleAndContent.content, 'base64').toString('ascii').split(RULES.rootBlockSeparator),
+			}));
+		},
 		ADD_ENGRAM(state, engramTitle) {
 			state.engrams.push({
 				title: engramTitle,
@@ -87,13 +93,13 @@ export default createStore({
 				commit('SET_LAST_COMMITTED_ENGRAM_DATA', engramTitle); // assume only one file can be updated at one time
 			}, 1500);
 		},
-		async fetchUser({ commit, state }) {
+		async fetchUserAndAllEngrams({ commit, state }) {
 			try {
 				const response = await axios.get('http://localhost:3000/', { withCredentials: true });
 
 				if (response.data && !state.username) {
 					commit('SET_USERNAME', response.data.username);
-					commit('SET_ENGRAMS', response.data.engramTitles);
+					commit('SET_ALL_ENGRAMS', response.data.allEngramsTitleAndContent);
 				} else if (!response.data) {
 					console.log(response.data);
 					console.log('Cannot fetch user; user is not authenticated.');
@@ -102,50 +108,50 @@ export default createStore({
 				console.error(error);
 			}
 		},
-		async fetchEngramList({ commit, state }) {
-			try {
-				const response = await axios.get('http://localhost:3000/engrams', { withCredentials: true, signal: abortController.signal });
+		// async fetchEngramList({ commit, state }) {
+		// 	try {
+		// 		const response = await axios.get('http://localhost:3000/engrams', { withCredentials: true, signal: abortController.signal });
 
-				if (state.engrams.length === 0) {
-					commit('SET_ENGRAMS', response.data);
-				} else { // TODO: don't think we need to check for list of engram once logged in?
-					const stateEngramTitles = state.engrams.map((stateEngram) => stateEngram.title);
+		// 		if (state.engrams.length === 0) {
+		// 			commit('SET_ENGRAMS', response.data);
+		// 		} else { // TODO: don't think we need to check for list of engram once logged in?
+		// 			const stateEngramTitles = state.engrams.map((stateEngram) => stateEngram.title);
 
-					if (JSON.stringify(stateEngramTitles) !== JSON.stringify(response.data)) {
-						commit('SET_ENGRAMS', response.data);
-					}
-				}
-			} catch (error) {
-				if (axios.isCancel(error)) {
-					console.log('Request from Engrams is canceled.');
-				} else {
-					console.error(error);
-				}
-			}
-		},
-		async fetchEngram({ commit, state }, engramTitle) {
-			try {
-				const response = await axios.get(`http://localhost:3000/engrams/${encodeURIComponent(engramTitle)}`, { withCredentials: true, signal: abortController.signal });
+		// 			if (JSON.stringify(stateEngramTitles) !== JSON.stringify(response.data)) {
+		// 				commit('SET_ENGRAMS', response.data);
+		// 			}
+		// 		}
+		// 	} catch (error) {
+		// 		if (axios.isCancel(error)) {
+		// 			console.log('Request from Engrams is canceled.');
+		// 		} else {
+		// 			console.error(error);
+		// 		}
+		// 	}
+		// },
+		// async fetchEngram({ commit, state }, engramTitle) {
+		// 	try {
+		// 		const response = await axios.get(`http://localhost:3000/engrams/${encodeURIComponent(engramTitle)}`, { withCredentials: true, signal: abortController.signal });
 
-				if (state.engrams.length === 0) {
-					commit('SET_ENGRAM', response.data);
-				} else {
-					const matchingStateEngramData = state.engrams.find((stateEngramData) => stateEngramData.title === response.data.title);
+		// 		if (state.engrams.length === 0) {
+		// 			commit('SET_ENGRAM', response.data);
+		// 		} else {
+		// 			const matchingStateEngramData = state.engrams.find((stateEngramData) => stateEngramData.title === response.data.title);
 
-					if (!matchingStateEngramData) {
-						commit('SET_ENGRAM', response.data);
-					} else if (matchingStateEngramData && JSON.stringify(matchingStateEngramData) !== JSON.stringify(response.data)) {
-						commit('SET_ENGRAM', response.data);
-					}
-				}
-			} catch (error) {
-				if (axios.isCancel(error)) {
-					console.log('Request from indivudal engram is canceled.');
-				} else {
-					console.error(error);
-				}
-			}
-		},
+		// 			if (!matchingStateEngramData) {
+		// 				commit('SET_ENGRAM', response.data);
+		// 			} else if (matchingStateEngramData && JSON.stringify(matchingStateEngramData) !== JSON.stringify(response.data)) {
+		// 				commit('SET_ENGRAM', response.data);
+		// 			}
+		// 		}
+		// 	} catch (error) {
+		// 		if (axios.isCancel(error)) {
+		// 			console.log('Request from indivudal engram is canceled.');
+		// 		} else {
+		// 			console.error(error);
+		// 		}
+		// 	}
+		// },
 		async putEngram({ state }, { engramTitle, engramIsNew }) {
 			try {
 				const matchedEngram = state.engrams.find((engram) => engram.title === engramTitle);

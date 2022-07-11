@@ -23,14 +23,14 @@ export default {
 	},
 	methods: {
 		...mapMutations(['SET_LAST_COMMITTED_ENGRAM_DATA']),
-		...mapActions(['setAbortController', 'fetchUser', 'fetchEngram', 'createEngram']),
+		...mapActions(['setAbortController', 'fetchUserAndAllEngrams', 'fetchEngram', 'createEngram']),
 		userIsLoggedIn() { // TODO: refactor when all components use Composition API
 			return !!this.$store.state.username;
 		},
 	},
 	created() {
 		this.setAbortController().then(() => {
-			this.fetchUser().then(() => {
+			this.fetchUserAndAllEngrams().then(() => {
 				console.log(`In creation of Landing, user is: ${this.$store.state.username}`);
 
 				if (this.userIsLoggedIn()) {
@@ -41,7 +41,7 @@ export default {
 						this.SET_LAST_COMMITTED_ENGRAM_DATA('Starred');
 					}
 
-					this.fetchEngram('Starred');
+					// this.fetchEngram('Starred');
 				}
 			});
 		});

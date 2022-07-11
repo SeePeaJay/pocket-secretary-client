@@ -7,7 +7,7 @@
 		<a v-if="userIsLoggedIn()" @click="logout()">
 			<img src="../assets/logout.svg" alt="tabler logout icon" />
 		</a>
-		<a v-else href="/auth/github">
+		<a v-else href="/auth/github"> <!-- Github only supports auth via href; axios won't work -->
 			<img src="../assets/login.svg" alt="tabler login icon" />
 		</a>
 	</nav>
@@ -21,28 +21,17 @@ export default {
 	name: 'AppBar',
 	methods: {
 		...mapMutations(['SET_USERNAME', 'SET_ENGRAMS']),
-		userIsLoggedIn() { // TODO: refactor when all components use Composition API
+		userIsLoggedIn() { // TODO: refactor if all components use Composition API
 			return !!this.$store.state.username;
-		},
-		async login() {
-			try {
-				await axios.get('http://localhost:3000/login', {}, { withCredentials: true }); // TODO: axios relative url
-
-				// this.SET_USERNAME('');
-				// this.SET_ENGRAMS([]);
-				// this.$router.push('/');
-				// console.log(this.$store.state.username);
-			} catch (error) {
-				console.error(error);
-			}
-			// create Starred engram if it doesn't exist
 		},
 		async logout() {
 			try {
 				await axios.post('http://localhost:3000/logout', {}, { withCredentials: true });
 				this.SET_USERNAME('');
 				this.SET_ENGRAMS([]);
+
 				this.$router.push('/');
+
 				console.log(this.$store.state.username);
 			} catch (error) {
 				console.error(error);
