@@ -1,14 +1,17 @@
 <template>
+	<AppBar />
 	<EngramEditor :engram-title="engramTitle" isEditable />
 </template>
 
 <script>
 import { mapActions, mapMutations } from 'vuex';
+import AppBar from '../components/AppBar.vue';
 import EngramEditor from '../components/EngramEditor.vue';
 
 export default {
 	name: 'Engram',
 	components: {
+		AppBar,
 		EngramEditor,
   },
 	computed: {
@@ -20,7 +23,7 @@ export default {
 		...mapMutations(['SET_LAST_COMMITTED_ENGRAM_DATA']),
 		...mapActions(['setAbortController', 'fetchEngram', 'cancelPreviousRequest']),
 	},
-	created() {
+	created() { // TODO: won't be called if URL changed to another engram?
 		this.SET_LAST_COMMITTED_ENGRAM_DATA(this.engramTitle);
 		// this.setAbortController().then((value) => {
 		// 	console.log(`At creation of individual engram. And right after setting the abort controller, it should be ${value}.`);

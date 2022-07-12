@@ -1,21 +1,21 @@
 <template>
-	<AppBar/>
+	<!-- <AppBar/> -->
 	<router-view></router-view>
 </template>
 
 <script>
 import { mapActions } from 'vuex';
-import AppBar from './components/AppBar.vue';
+// import AppBar from './components/AppBar.vue';
 
 export default {
   name: 'App',
-  components: {
-		AppBar,
-  },
+  // components: {
+	// 	AppBar,
+  // },
 	methods: {
 		...mapActions(['cancelPreviousRequest']),
 		beforeWindowUnload() {
-			this.cancelPreviousRequest();
+			this.cancelPreviousRequest(); // otherwise, request aborted error upon refresh
 		},
 	},
 	created() {

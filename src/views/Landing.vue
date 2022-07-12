@@ -1,55 +1,122 @@
 <template>
+	<p v-if="isLoading">Loading ...</p>
+	<AppBar v-if="!isLoading"/>
 	<!-- <p v-if="userIsLoggedIn()">User authenticated</p>
 	<p v-else>User not authenticated</p> -->
-	<EngramEditor v-if="userIsLoggedIn()" engram-title="Starred" isEditable/>
+	<EngramEditor v-if="!isLoading && userIsLoggedIn()" engram-title="Starred" isEditable/>
 	<EngramEditor
-		v-else engram-title="Default Engram Page" :unauthenticated-engram-blocks="unauthenticatedEngramBlocks"
+		v-if="!isLoading && !userIsLoggedIn()"
+		engram-title="Default Engram Page"
+		:unauthenticated-engram-blocks="unauthenticatedEngramBlocks"
 	/>
 </template>
 
 <script>
 import { mapMutations, mapActions } from 'vuex';
+import store from '../store';
+import AppBar from '../components/AppBar.vue';
 import EngramEditor from '../components/EngramEditor.vue';
 
 export default {
 	name: 'Landing',
 	components: {
+		AppBar,
 		EngramEditor,
   },
 	data() {
 		return {
 			unauthenticatedEngramBlocks: ['* Multi-Tool', ' Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec orci justo, finibus id turpis finibus, convallis viverra arcu. Aliquam risus ligula, malesuada et commodo eu, ornare eget mauris. Aenean ac risus vitae lacus varius cursus sit amet eu diam. Morbi ultricies orci eros, ac luctus ante euismod eget. Vivamus et orci a augue vulputate imperdiet ac vestibulum lorem. Donec placerat accumsan orci, ut cursus ante volutpat et. Aliquam erat volutpat. Cras euismod est diam, a malesuada metus malesuada sit amet. Curabitur vel vulputate libero. Nulla a diam pulvinar, lacinia diam vitae, aliquam sem. ', '*_1 Motivation', 'Donec malesuada dignissim leo, nec pulvinar orci convallis non. Duis ullamcorper massa non enim consequat pellentesque. Aliquam a diam ac magna varius egestas. Etiam gravida volutpat tincidunt. Praesent faucibus mauris enim, sit amet laoreet felis tempor quis. Donec faucibus iaculis varius. Sed risus nunc, vehicula eu lorem id, facilisis rutrum nunc. Ut ultrices iaculis blandit. Aliquam imperdiet odio nec egestas accumsan. Mauris varius ultrices dui sit amet molestie.'],
+			isLoading: false,
 		};
 	},
 	methods: {
 		...mapMutations(['SET_LAST_COMMITTED_ENGRAM_DATA']),
-		...mapActions(['setAbortController', 'fetchUserAndAllEngrams', 'fetchEngram', 'createEngram']),
+		...mapActions(['setAbortController', 'cancelPreviousRequest', 'fetchUserAndAllEngrams', 'fetchEngram', 'createEngram']),
 		userIsLoggedIn() { // TODO: refactor when all components use Composition API
-			return !!this.$store.state.username;
+			return !!store.state.username;
 		},
 	},
-	created() {
-		this.setAbortController().then(() => {
-			this.fetchUserAndAllEngrams().then(() => {
-				console.log(`In creation of Landing, user is: ${this.$store.state.username}`);
+	// beforeRouteEnter(to, from, next) {
+	// 	if (!store.state.username) {
+	// 		// store.dispatch('setAbortController').then(() => { // TODO: removable?
+	// 		// });
+	// 		store.dispatch('fetchUserAndAllEngrams').then(() => {
+	// 			console.log(`In creation of Landing, user is: ${store.state.username}`);
 
-				if (this.userIsLoggedIn()) {
-					const engramTitles = this.$store.state.engrams.map((engram) => engram.title);
+	// 			if (store.state.username) {
+	// 				const engramTitles = store.state.engrams.map((engram) => engram.title);
+
+	// 				if (!engramTitles.includes('Starred')) {
+	// 					store.dispatch('createEngram', 'Starred');
+	// 					store.commit('SET_LAST_COMMITTED_ENGRAM_DATA', 'Starred');
+	// 				}
+	// 			}
+	// 		});
+	// 	}
+
+	// 	next(); // TODO: 1. if inside if stmt, won't load; if outside if stmt, unauth page will display during load ...
+  // },
+	created() {
+		if (!this.userIsLoggedIn()) {
+			this.isLoading = true;
+
+			store.dispatch('fetchUserAndAllEngrams').then(() => {
+				console.log(`In creation of Landing, user is: ${store.state.username}`);
+
+				if (this.userIsLoggedIn()) { // without this, will attempt to create engram even if unauthed
+					const engramTitles = store.state.engrams.map((engram) => engram.title);
 
 					if (!engramTitles.includes('Starred')) {
-						this.createEngram('Starred');
-						this.SET_LAST_COMMITTED_ENGRAM_DATA('Starred');
+						store.dispatch('createEngram', 'Starred');
+						store.commit('SET_LAST_COMMITTED_ENGRAM_DATA', 'Starred');
 					}
-
-					// this.fetchEngram('Starred');
 				}
-			});
-		});
 
-		// this.setAbortController().then((value) => {
-		// 	console.log(`At creation of Engrams. And right after setting the abort controller, it should be ${value}`);
-		// 	this.fetchEngramList();
+				this.isLoading = false;
+			});
+		}
+		// this.setAbortController().then(() => {
+		// 	this.fetchUserAndAllEngrams().then(() => {
+		// 		console.log(`In creation of Landing, user is: ${this.$store.state.username}`);
+
+		// 		if (this.userIsLoggedIn()) {
+		// 			const engramTitles = this.$store.state.engrams.map((engram) => engram.title);
+
+		// 			if (!engramTitles.includes('Starred')) {
+		// 				this.createEngram('Starred');
+		// 				this.SET_LAST_COMMITTED_ENGRAM_DATA('Starred');
+		// 			}
+
+		// 			// this.fetchEngram('Starred');
+		// 		}
+		// 	});
 		// });
 	},
+	// 	// this.setAbortController().then((value) => {
+	// 	// 	console.log(`At creation of Engrams. And right after setting the abort controller, it should be ${value}`);
+	// 	// 	this.fetchEngramList();
+	// 	// });
+	// },
 };
 </script>
+
+<style scoped>
+p {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translateX(-50%) translateY(-50%);
+  -webkit-transform: translate(-50%,-50%);
+  transform: translate(-50%,-50%);
+
+	font-size: 2em;
+
+	animation: color-change 2.5s infinite;
+}
+
+@keyframes color-change {
+  0% { color: white; }
+  50% { color: #2c3e50; }
+  100% { color: white; }
+}
+</style>

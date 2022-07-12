@@ -1,4 +1,5 @@
 <template>
+	<AppBar />
 	<div class="engrams-pane">
 		<div class="engrams-area">
 				<h1>Engrams</h1>
@@ -14,9 +15,13 @@
 
 <script>
 import { mapActions } from 'vuex';
+import AppBar from '../components/AppBar.vue';
 
 export default {
   name: 'Engrams',
+	components: {
+		AppBar,
+	},
   computed: {
 		engrams() {
 			return [...this.$store.state.engrams].sort((a, b) => {

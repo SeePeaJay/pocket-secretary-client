@@ -93,9 +93,10 @@ export default createStore({
 				commit('SET_LAST_COMMITTED_ENGRAM_DATA', engramTitle); // assume only one file can be updated at one time
 			}, 1500);
 		},
-		async fetchUserAndAllEngrams({ commit, state }) {
+		async fetchUserAndAllEngrams({ commit, dispatch, state }) {
 			try {
-				const response = await axios.get('http://localhost:3000/', { withCredentials: true });
+				dispatch('setAbortController');
+				const response = await axios.get('http://localhost:3000/', { withCredentials: true, signal: abortController.signal });
 
 				if (response.data && !state.username) {
 					commit('SET_USERNAME', response.data.username);
@@ -161,7 +162,7 @@ export default createStore({
 
 				await axios.put('http://localhost:3000/engram',
 					{ engramTitle, engramContent, engramIsNew },
-					{ withCredentials: true, signal: abortController.signal });
+					{ withCredentials: true, signal: abortController.signal }); // TODO: dispatch setAbortController?
 			} catch (error) {
 				if (axios.isCancel(error)) {
 					console.log('Request from indivudal engram is canceled.');
