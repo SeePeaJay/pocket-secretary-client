@@ -1,8 +1,6 @@
 <template>
 	<p v-if="isLoading">Loading ...</p>
 	<AppBar v-if="!isLoading"/>
-	<!-- <p v-if="userIsLoggedIn()">User authenticated</p>
-	<p v-else>User not authenticated</p> -->
 	<EngramEditor v-if="!isLoading && userIsLoggedIn()" engram-title="Starred" isEditable/>
 	<EngramEditor
 		v-if="!isLoading && !userIsLoggedIn()"
@@ -36,33 +34,13 @@ export default {
 			return !!store.state.username;
 		},
 	},
-	// beforeRouteEnter(to, from, next) {
-	// 	if (!store.state.username) {
-	// 		// store.dispatch('setAbortController').then(() => { // TODO: removable?
-	// 		// });
-	// 		store.dispatch('fetchUserAndAllEngrams').then(() => {
-	// 			console.log(`In creation of Landing, user is: ${store.state.username}`);
-
-	// 			if (store.state.username) {
-	// 				const engramTitles = store.state.engrams.map((engram) => engram.title);
-
-	// 				if (!engramTitles.includes('Starred')) {
-	// 					store.dispatch('createEngram', 'Starred');
-	// 					store.commit('SET_LAST_COMMITTED_ENGRAM_DATA', 'Starred');
-	// 				}
-	// 			}
-	// 		});
-	// 	}
-
-	// 	next(); // TODO: 1. if inside if stmt, won't load; if outside if stmt, unauth page will display during load ...
-  // },
 	created() {
+		console.log(`At Landing's created(), user is: ${store.state.username}`);
+
 		if (!this.userIsLoggedIn()) {
 			this.isLoading = true;
 
 			store.dispatch('fetchUserAndAllEngrams').then(() => {
-				console.log(`In creation of Landing, user is: ${store.state.username}`);
-
 				if (this.userIsLoggedIn()) { // without this, will attempt to create engram even if unauthed
 					const engramTitles = store.state.engrams.map((engram) => engram.title);
 
@@ -75,28 +53,7 @@ export default {
 				this.isLoading = false;
 			});
 		}
-		// this.setAbortController().then(() => {
-		// 	this.fetchUserAndAllEngrams().then(() => {
-		// 		console.log(`In creation of Landing, user is: ${this.$store.state.username}`);
-
-		// 		if (this.userIsLoggedIn()) {
-		// 			const engramTitles = this.$store.state.engrams.map((engram) => engram.title);
-
-		// 			if (!engramTitles.includes('Starred')) {
-		// 				this.createEngram('Starred');
-		// 				this.SET_LAST_COMMITTED_ENGRAM_DATA('Starred');
-		// 			}
-
-		// 			// this.fetchEngram('Starred');
-		// 		}
-		// 	});
-		// });
 	},
-	// 	// this.setAbortController().then((value) => {
-	// 	// 	console.log(`At creation of Engrams. And right after setting the abort controller, it should be ${value}`);
-	// 	// 	this.fetchEngramList();
-	// 	// });
-	// },
 };
 </script>
 

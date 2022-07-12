@@ -11,8 +11,6 @@
 </template>
 
 <script>
-// need to import router and go to link programmaticaly?
-
 export default {
 	name: 'EngramLink',
 	props: {
@@ -21,14 +19,10 @@ export default {
 	methods: {
 		engramDoesExist() {
 			return this.$store.state.engrams.find((engram) => engram.title === this.engramTitle);
-			// return false;
 		},
 		async createAndGoToEngram() {
 			// create a local and remote copy of engram
 			await this.$store.dispatch('createEngram', this.engramTitle);
-
-			// test
-			// console.log(this.$store.state.engrams);
 
 			// go to the actual link programmatically
 			this.$router.push({ name: 'Engram', params: { engramTitle: this.engramTitle } });
@@ -38,7 +32,7 @@ export default {
 </script>
 
 <style scoped>
-/* empty link appearance: cursor, underline, and dark blue*/
+/*empty link appearance: cursor, underline, and gray*/
 .placeholder {
 	text-decoration: underline;
 	color: gray;

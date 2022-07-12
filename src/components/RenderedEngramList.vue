@@ -42,7 +42,7 @@ export default {
 
 			return 'ol';
 		},
-		getEngramTitle(engramLink) { // duplicated method from parent component; consider improvements
+		getEngramTitle(engramLink) { // TODO: duplicated method from parent component; consider improvements
 			return engramLink.slice(1, -2);
 		},
 		stopPropagation(event) {

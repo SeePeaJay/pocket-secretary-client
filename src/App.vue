@@ -1,17 +1,12 @@
 <template>
-	<!-- <AppBar/> -->
 	<router-view></router-view>
 </template>
 
 <script>
 import { mapActions } from 'vuex';
-// import AppBar from './components/AppBar.vue';
 
 export default {
   name: 'App',
-  // components: {
-	// 	AppBar,
-  // },
 	methods: {
 		...mapActions(['cancelPreviousRequest']),
 		beforeWindowUnload() {
@@ -28,7 +23,7 @@ export default {
 </script>
 
 <style>
-* { /* perhaps there's a better way of resetting? */
+* { /* TODO: perhaps there's a better way of resetting? */
 	margin: 0;
 	/* padding: 0; */
 }

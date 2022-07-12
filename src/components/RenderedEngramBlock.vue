@@ -58,7 +58,7 @@ export default {
 		html() {
 			let cryptarch = new Cryptarch();
 			const html = cryptarch.decrypt(this.blockContent);
-			cryptarch = null; // is there a better way to prevent memory leak than this?
+			cryptarch = null; // TODO: is there a better way to prevent memory leak than this?
 
 			// console.log(html);
 

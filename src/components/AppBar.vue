@@ -20,15 +20,14 @@ import axios from 'axios';
 export default {
 	name: 'AppBar',
 	methods: {
-		...mapMutations(['SET_USERNAME', 'SET_ENGRAMS']),
+		...mapMutations(['REMOVE_ALL_USER_DATA']),
 		userIsLoggedIn() { // TODO: refactor if all components use Composition API
 			return !!this.$store.state.username;
 		},
 		async logout() {
 			try {
 				await axios.post('http://localhost:3000/logout', {}, { withCredentials: true });
-				this.SET_USERNAME('');
-				this.SET_ENGRAMS([]);
+				this.REMOVE_ALL_USER_DATA();
 
 				this.$router.push('/');
 
