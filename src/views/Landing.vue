@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { mapMutations, mapActions } from 'vuex';
+import { mapActions } from 'vuex';
 import store from '../store';
 import AppBar from '../components/AppBar.vue';
 import EngramEditor from '../components/EngramEditor.vue';
@@ -28,7 +28,6 @@ export default {
 		};
 	},
 	methods: {
-		...mapMutations(['SET_LAST_COMMITTED_ENGRAM_DATA']),
 		...mapActions(['fetchUserAndAllEngrams', 'createEngram']),
 		userIsLoggedIn() { // TODO: refactor when all components use Composition API
 			return !!store.state.username;
@@ -46,7 +45,6 @@ export default {
 
 					if (!engramTitles.includes('Starred')) {
 						store.dispatch('createEngram', 'Starred');
-						store.commit('SET_LAST_COMMITTED_ENGRAM_DATA', 'Starred');
 					}
 				}
 

@@ -58,7 +58,7 @@ export default {
 				};
 
 				store.commit('SET_ENGRAM_BLOCK', payload);
-				store.dispatch('setPutEngramRequestAndLastCommittedEngramData', props.engramTitle);
+				store.dispatch('setPutEngramRequest', props.engramTitle);
 
 				nextTick(() => {
 					engramBlockEditors.value[previousBlockIndex].enterEditMode();
@@ -79,7 +79,7 @@ export default {
 				};
 
 				store.commit('SET_ENGRAM_BLOCK', payload);
-				store.dispatch('setPutEngramRequestAndLastCommittedEngramData', props.engramTitle);
+				store.dispatch('setPutEngramRequest', props.engramTitle);
 
 				nextTick(() => {
 					engramBlockEditors.value[nextBlockIndex].enterEditMode();
