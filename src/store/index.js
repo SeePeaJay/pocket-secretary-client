@@ -3,7 +3,7 @@ import createPersistedState from 'vuex-persistedstate';
 import axios from 'axios';
 import { RULES } from '../cryptarch/constants';
 
-let abortController = null;
+const abortController = new AbortController();
 let putEngramRequest;
 
 export default createStore({
@@ -61,19 +61,13 @@ export default createStore({
 		},
   },
   actions: {
-		setAbortController() {
-			abortController = new AbortController();
-
-			return abortController !== null;
-		},
 		cancelPreviousRequest() {
 			if (abortController) {
 				abortController.abort();
 			}
 		},
-		async fetchUserAndAllEngrams({ commit, dispatch, state }) {
+		async fetchUserAndAllEngrams({ commit, state }) {
 			try {
-				dispatch('setAbortController');
 				const response = await axios.get('http://localhost:3000/', { withCredentials: true, signal: abortController.signal });
 
 				if (response.data && !state.username) {
@@ -102,7 +96,7 @@ export default createStore({
 
 				await axios.put('http://localhost:3000/engram',
 					{ engramTitle, engramContent, engramIsNew },
-					{ withCredentials: true, signal: abortController.signal }); // TODO: dispatch setAbortController?
+					{ withCredentials: true, signal: abortController.signal }); // there shouldn't be any need to call cancelPreviousRequest here; the last uninterrupted request must be sent regardless of whatever route the user is in
 			} catch (error) {
 				if (axios.isCancel(error)) {
 					console.log('Request from indivudal engram is canceled.');
@@ -112,7 +106,7 @@ export default createStore({
 			}
 		},
 		setPutEngramRequestAndLastCommittedEngramData({ commit, dispatch }, engramTitle) {
-			if (putEngramRequest) {
+			if (putEngramRequest) { // remove queue if it was created within the past specified amount of seconds
 				clearTimeout(putEngramRequest);
 			}
 

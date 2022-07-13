@@ -4,7 +4,7 @@
 </template>
 
 <script>
-import { mapActions, mapMutations } from 'vuex';
+import { mapMutations } from 'vuex';
 import AppBar from '../components/AppBar.vue';
 import EngramEditor from '../components/EngramEditor.vue';
 
@@ -21,7 +21,6 @@ export default {
 	},
 	methods: {
 		...mapMutations(['SET_LAST_COMMITTED_ENGRAM_DATA']),
-		...mapActions(['setAbortController', 'fetchEngram', 'cancelPreviousRequest']),
 	},
 	created() { // TODO: won't be called if engram part of URL changes?
 		this.SET_LAST_COMMITTED_ENGRAM_DATA(this.engramTitle);

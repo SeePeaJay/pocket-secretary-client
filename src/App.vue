@@ -9,7 +9,7 @@ export default {
   name: 'App',
 	methods: {
 		...mapActions(['cancelPreviousRequest']),
-		beforeWindowUnload() {
+		beforeWindowUnload() { // TODO: alert popup when user wants to leave?
 			this.cancelPreviousRequest(); // otherwise, request aborted error upon refresh
 		},
 	},

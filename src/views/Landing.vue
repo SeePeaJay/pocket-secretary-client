@@ -29,7 +29,7 @@ export default {
 	},
 	methods: {
 		...mapMutations(['SET_LAST_COMMITTED_ENGRAM_DATA']),
-		...mapActions(['setAbortController', 'cancelPreviousRequest', 'fetchUserAndAllEngrams', 'fetchEngram', 'createEngram']),
+		...mapActions(['fetchUserAndAllEngrams', 'createEngram']),
 		userIsLoggedIn() { // TODO: refactor when all components use Composition API
 			return !!store.state.username;
 		},
