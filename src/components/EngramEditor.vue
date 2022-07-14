@@ -144,7 +144,7 @@ export default {
 }
 
 .engram-editor-area{
-	width: 50%;
+	width: 75%;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
