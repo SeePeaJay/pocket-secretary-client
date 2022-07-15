@@ -10,6 +10,7 @@
 							:id="atLeastOneEngramIsSelected ? 'active-trash-icon' : 'disabled-trash-icon'"
 							:src="atLeastOneEngramIsSelected ? require('../assets/trash.svg') : require('../assets/trash-off.svg')"
 							alt="tabler trash icon"
+							@click="if (atLeastOneEngramIsSelected) { togglePopup(); }"
 						/>
 					</th>
 				</tr>
@@ -34,7 +35,7 @@
 			</table>
 		</div>
 	</div>
-	<DeletePopup />
+	<DeletePopup v-if="popupShouldBeActive" :selected-engrams="selectedEngrams" @toggle-popup="togglePopup()"/>
 </template>
 
 <script>
@@ -50,6 +51,7 @@ export default {
 	data() {
 		return {
 			selectedEngrams: [],
+			popupShouldBeActive: false,
 		};
 	},
   computed: {
@@ -104,6 +106,9 @@ export default {
 			} else {
 				this.selectedEngrams.push(engramTitle);
 			}
+		},
+		togglePopup() {
+			this.popupShouldBeActive = !this.popupShouldBeActive;
 		},
 		getWordCount(engramTitle) { // TODO: ignore block markers?
 			const { rootBlocks } = this.$store.state.engrams.find((engram) => engram.title === engramTitle);
