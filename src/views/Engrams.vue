@@ -7,9 +7,8 @@
 				<tr>
 					<th >
 						<img
-							id="trash-icon"
-							:class="atLeastOneEngramIsSelected ? 'active-trash-icon' : 'disabled-trash-icon'"
-							:src="(this.atLeastOneEngramIsSelected) ? require('../assets/trash.svg') : require('../assets/trash-off.svg')"
+							:id="atLeastOneEngramIsSelected ? 'active-trash-icon' : 'disabled-trash-icon'"
+							:src="atLeastOneEngramIsSelected ? require('../assets/trash.svg') : require('../assets/trash-off.svg')"
 							alt="tabler trash icon"
 						/>
 					</th>
@@ -35,21 +34,22 @@
 			</table>
 		</div>
 	</div>
+	<DeletePopup />
 </template>
 
 <script>
 import AppBar from '../components/AppBar.vue';
+import DeletePopup from '../components/DeletePopup.vue';
 
 export default {
   name: 'Engrams',
 	components: {
 		AppBar,
+		DeletePopup,
 	},
 	data() {
 		return {
-			// selectAllShouldBeOn: false,
 			selectedEngrams: [],
-			isInDefaultState: true,
 		};
 	},
   computed: {
@@ -85,89 +85,36 @@ export default {
 				this.selectedEngrams = selected;
 			},
 		},
-		// trashIconSrc() {
-		// 	return (this.atLeastOneEngramIsSelected) ? require('../assets/trash.svg') : '../assets/trash.svg';
-		// },
-		engrams() { // Starred engram at top
-			return [...this.$store.state.engrams].sort((a, b) => {
-				const titleA = a.title.toUpperCase();
-				const titleB = b.title.toUpperCase();
-
-				if (titleA < titleB) {
-					return -1;
-				}
-
-				if (titleA > titleB) {
-					return 1;
-				}
-
-				return 0;
-			});
-		},
 		atLeastOneEngramIsSelected() {
-			// console.log(this.selectedEngrams.length);
 			return this.selectedEngrams.length;
-		},
-		allEngramsAreSelected() {
-			return this.selectedEngrams.length === this.allEngramTitles.length;
-		},
-		atLeastOneCheckboxIsSelected() {
-			return this.selectAllShouldBeOn || this.atLeastOneEngramIsSelected;
 		},
 	},
 	methods: {
+		toggleSelectAllEngrams() {
+			if (this.selectedEngrams.length === this.allEngramTitles.length) {
+				this.selectedEngrams = [];
+			} else {
+				this.selectedEngrams = [...this.allEngramTitles];
+			}
+		},
+		modifySelectedEngrams(engramTitle) {
+			const foundTitle = this.selectedEngrams.find((selectedTitle) => selectedTitle === engramTitle);
+			if (foundTitle) {
+				this.selectedEngrams.splice(this.selectedEngrams.indexOf(foundTitle), 1);
+			} else {
+				this.selectedEngrams.push(engramTitle);
+			}
+		},
 		getWordCount(engramTitle) { // TODO: ignore block markers?
 			const { rootBlocks } = this.$store.state.engrams.find((engram) => engram.title === engramTitle);
 
 			return rootBlocks.reduce((accumulator, currentValue) => {
 				if (currentValue) {
-					// console.log(currentValue.trim().split(/[\n\r\s]+/));
-					return accumulator + currentValue.trim().split(' ').length;
+					return accumulator + currentValue.trim().split(/[\n\r\s]+/).length; // words are characters delimited by any amount of whitespaces or newlines
 				}
 
 				return accumulator;
 			}, 0);
-		},
-		toggleSelectAllEngrams() {
-			// console.log(this.selectAll);
-			// this.selectAllShouldBeOn = !this.selectAllShouldBeOn;
-
-			if (this.selectedEngrams.length === this.allEngramTitles.length) {
-				this.selectAllShouldBeOn = false;
-				this.selectedEngrams = [];
-			} else {
-				console.log('after toggle all ...');
-				this.selectAllShouldBeOn = true;
-				this.selectedEngrams = [...this.allEngramTitles];
-				console.log(this.selectedEngrams);
-			}
-		},
-		// selectAll() {
-		// 	console.log();
-		// },
-		modifySelectedEngrams(engramTitle) {
-			const foundTitle = this.selectedEngrams.find((selectedTitle) => selectedTitle === engramTitle);
-			// console.log(foundTitle);
-			if (foundTitle) {
-				console.log(this.selectedEngrams.indexOf(foundTitle));
-				this.selectedEngrams.splice(this.selectedEngrams.indexOf(foundTitle), 1);
-				// console.log(this.selectedEngrams);
-				// this.selectAllShouldBeOn = true;
-			} else {
-				this.selectedEngrams.push(engramTitle);
-				// this.selectAllShouldBeOn = true;
-			}
-			console.log(this.selectedEngrams);
-
-			// if (this.atLeastOneEngramIsSelected) {
-			// 	this.selectAllShouldBeOn = true;
-			// } else {
-			// 	this.selectAllShouldBeOn = false;
-			// }
-
-			// if (this.selected.length === this.engrams.length) {
-			// 	this.selectAll = true;
-			// }
 		},
 	},
 };
@@ -194,26 +141,20 @@ h1 {
 	margin-bottom: 5%;
 }
 
-table {
-	width: 100%;
-}
-
-/* #trash-icon {
-	width: 24px;
-	height: 24px;
-} */
-
-.disabled-trash-icon {
+#disabled-trash-icon {
 	filter: invert(85%) sepia(10%) saturate(8%) hue-rotate(319deg) brightness(104%) contrast(90%); /* #dddddd */
 }
 
-.active-trash-icon {
+#active-trash-icon {
 filter: invert(58%) sepia(0%) saturate(420%) hue-rotate(146deg) brightness(94%) contrast(79%);
 }
 
-.active-trash-icon:hover {
+#active-trash-icon:hover {
 	filter: invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%); /* #2c3e50 */
 	cursor: pointer;
 }
 
+table {
+	width: 100%;
+}
 </style>
