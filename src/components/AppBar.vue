@@ -1,18 +1,22 @@
 <template>
 	<nav>
-		<router-link v-if="userIsLoggedIn()" to="/engrams">
+		<template v-if="userIsLoggedIn()">
+			<router-link to="/engrams">
 				<img src="../assets/stack-2.svg" alt="tabler stack-2 icon" />
 			</router-link>
-		<span v-else></span> <!-- a quick hack for fixing the login button in place when unauthed-->
-		<router-link v-if="userIsLoggedIn()" class="starred-engram-link" :to="{ name: 'Engram', params: { engramTitle: 'Starred' }}">
-			<img src="../assets/star.svg" alt="tabler star icon" />
-		</router-link>
-		<a v-if="userIsLoggedIn()" class="right-side" @click="logout()">
-			<img src="../assets/logout.svg" alt="tabler logout icon" />
-		</a>
-		<a v-else class="right-side" href="/auth/github"> <!-- Github only supports auth via href; axios won't work -->
-			<img src="../assets/login.svg" alt="tabler login icon" />
-		</a>
+			<router-link class="starred-engram-link" :to="{ name: 'Engram', params: { engramTitle: 'Starred' }}">
+				<img src="../assets/star.svg" alt="tabler star icon" />
+			</router-link>
+			<a class="right-side" @click="logout()">
+				<img src="../assets/logout.svg" alt="tabler logout icon" />
+			</a>
+		</template>
+		<template v-else>
+			<span></span> <!-- a quick hack for fixing the login button in place when unauthed-->
+			<a class="right-side" href="/auth/github"> <!-- Github only supports auth via href; axios won't work -->
+				<img src="../assets/login.svg" alt="tabler login icon" />
+			</a>
+		</template>
 	</nav>
 </template>
 
