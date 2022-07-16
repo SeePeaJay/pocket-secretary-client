@@ -17,11 +17,11 @@ export default createStore({
 		},
 	},
   mutations: {
-		SET_USERNAME_AND_ALL_ENGRAMS(state, { username, allEngramsTitleAndContent }) {
+		SET_USERNAME_AND_EVERY_ENGRAM(state, { username, everyEngramTitleAndContent }) {
 			state.username = username;
 			// console.log(`state.username: ${state.username}`);
 
-			state.engrams = allEngramsTitleAndContent.map((engramTitleAndContent) => ({
+			state.engrams = everyEngramTitleAndContent.map((engramTitleAndContent) => ({
 				title: engramTitleAndContent.title,
 				rootBlocks: Buffer.from(engramTitleAndContent.content, 'base64').toString('ascii').split(RULES.rootBlockSeparator),
 			}));
@@ -38,6 +38,12 @@ export default createStore({
 			state.engrams.push({
 				title: engramTitle,
 				rootBlocks: [`* ${engramTitle}`],
+			});
+		},
+		REMOVE_ENGRAMS(state, engramTitles) {
+			engramTitles.forEach((title) => {
+				const foundEngram = state.engrams.find((engram) => engram.title === title);
+				state.engrams.splice(state.engrams.indexOf(foundEngram), 1);
 			});
 		},
 		ADD_ENGRAM_BLOCK(state, { engramTitle, blockIndex, blockContent }) {
@@ -58,14 +64,14 @@ export default createStore({
 				abortController.abort();
 			}
 		},
-		async fetchUserAndAllEngrams({ commit, state }) {
+		async fetchUserAndEveryEngram({ commit, state }) {
 			try {
 				const response = await axios.get('http://localhost:3000/', { withCredentials: true, signal: abortController.signal });
 
 				if (response.data && !state.username) {
-					commit('SET_USERNAME_AND_ALL_ENGRAMS', {
+					commit('SET_USERNAME_AND_EVERY_ENGRAM', {
 						username: response.data.username,
-						allEngramsTitleAndContent: response.data.allEngramsTitleAndContent,
+						everyEngramTitleAndContent: response.data.everyEngramTitleAndContent,
 					});
 				} else if (!response.data) {
 					console.log(response.data);
@@ -106,6 +112,9 @@ export default createStore({
 				await dispatch('putEngram', { engramTitle, engramIsNew: false }); // assume only one file can be updated at one time
 			}, 1500);
 		},
+		// deleteEngrams({}, engramTitles) {
+
+		// },
   },
   modules: {
   },

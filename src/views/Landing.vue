@@ -28,7 +28,7 @@ export default {
 		};
 	},
 	methods: {
-		...mapActions(['fetchUserAndAllEngrams', 'createEngram']),
+		...mapActions(['fetchUserAndEveryEngram', 'createEngram']),
 		userIsLoggedIn() { // TODO: refactor when all components use Composition API
 			return !!store.state.username;
 		},
@@ -39,7 +39,7 @@ export default {
 		if (!this.userIsLoggedIn()) {
 			this.isLoading = true;
 
-			store.dispatch('fetchUserAndAllEngrams').then(() => {
+			store.dispatch('fetchUserAndEveryEngram').then(() => {
 				if (this.userIsLoggedIn()) { // without this, will attempt to create engram even if unauthed
 					const engramTitles = store.state.engrams.map((engram) => engram.title);
 

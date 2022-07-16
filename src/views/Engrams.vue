@@ -6,11 +6,11 @@
 			<table>
 				<tr>
 					<th >
-						<img
-							:id="atLeastOneEngramIsSelected ? 'active-trash-icon' : 'disabled-trash-icon'"
-							:src="atLeastOneEngramIsSelected ? require('../assets/trash.svg') : require('../assets/trash-off.svg')"
-							alt="tabler trash icon"
-							@click="if (atLeastOneEngramIsSelected) { togglePopup(); }"
+						<img v-show="atLeastOneEngramTitleIsSelected"
+							id="active-trash-icon" src="../assets/trash.svg" alt="tabler trash icon" @click="togglePopup()"
+						/>
+						<img v-show="!atLeastOneEngramTitleIsSelected"
+							id="disabled-trash-icon" src="../assets/trash-off.svg" alt="tabler trash icon"
 						/>
 					</th>
 				</tr>
@@ -22,9 +22,9 @@
 					<th>Word Count</th>
 					<th>Last Modified</th>
 				</tr>
-				<tr v-for="engramTitle in allEngramTitles" :key="engramTitle"> <!-- engramTitle should be unique -->
+				<tr v-for="engramTitle in everyEngramTitleByUser" :key="engramTitle"> <!-- engramTitle should be unique -->
 					<td style="text-align:center">
-						<input type="checkbox" v-model="selectedEngrams" :value="engramTitle"> <!-- must have the value bind for this to work -->
+						<input type="checkbox" v-model="selectedEngramTitles" :value="engramTitle"> <!-- must have the value bind for this to work -->
 					</td>
 					<td>
 						<router-link :to="{ name: 'Engram', params: { engramTitle: engramTitle }}">{{ engramTitle }}</router-link>
@@ -35,7 +35,7 @@
 			</table>
 		</div>
 	</div>
-	<DeletePopup v-if="popupShouldBeActive" :selected-engrams="selectedEngrams" @toggle-popup="togglePopup()"/>
+	<DeletePopup v-if="popupShouldBeActive" :selected-engram-titles="selectedEngramTitles" @toggle-popup="togglePopup()" @clear-selected-engrams="clearSelectedEngramTitles()"/>
 </template>
 
 <script>
@@ -50,13 +50,13 @@ export default {
 	},
 	data() {
 		return {
-			selectedEngrams: [],
+			selectedEngramTitles: [],
 			popupShouldBeActive: false,
 		};
 	},
   computed: {
-		allEngramTitles() {
-			return this.$store.state.engrams.map((engram) => engram.title).sort((a, b) => {
+		everyEngramTitleByUser() { // does not include Starred
+			return this.$store.state.engrams.filter((engram) => engram.title !== 'Starred').map((engram) => engram.title).sort((a, b) => {
 				const titleA = a.toUpperCase();
 				const titleB = b.toUpperCase();
 
@@ -73,42 +73,30 @@ export default {
 		},
 		selectAll: {
 			get() {
-				return this.allEngramTitles ? this.selectedEngrams.length === this.allEngramTitles.length : false;
+				return this.everyEngramTitleByUser ? this.selectedEngramTitles.length === this.everyEngramTitleByUser.length : false;
 			},
 			set(value) {
 				const selected = [];
 
 				if (value) {
-					this.allEngramTitles.forEach((engramTitle) => {
+					this.everyEngramTitleByUser.forEach((engramTitle) => {
 						selected.push(engramTitle);
 					});
 				}
 
-				this.selectedEngrams = selected;
+				this.selectedEngramTitles = selected;
 			},
 		},
-		atLeastOneEngramIsSelected() {
-			return this.selectedEngrams.length;
+		atLeastOneEngramTitleIsSelected() {
+			return this.selectedEngramTitles.length;
 		},
 	},
 	methods: {
-		toggleSelectAllEngrams() {
-			if (this.selectedEngrams.length === this.allEngramTitles.length) {
-				this.selectedEngrams = [];
-			} else {
-				this.selectedEngrams = [...this.allEngramTitles];
-			}
-		},
-		modifySelectedEngrams(engramTitle) {
-			const foundTitle = this.selectedEngrams.find((selectedTitle) => selectedTitle === engramTitle);
-			if (foundTitle) {
-				this.selectedEngrams.splice(this.selectedEngrams.indexOf(foundTitle), 1);
-			} else {
-				this.selectedEngrams.push(engramTitle);
-			}
-		},
 		togglePopup() {
 			this.popupShouldBeActive = !this.popupShouldBeActive;
+		},
+		clearSelectedEngramTitles() {
+			this.selectedEngramTitles = [];
 		},
 		getWordCount(engramTitle) { // TODO: ignore block markers?
 			const { rootBlocks } = this.$store.state.engrams.find((engram) => engram.title === engramTitle);
