@@ -112,9 +112,24 @@ export default createStore({
 				await dispatch('putEngram', { engramTitle, engramIsNew: false }); // assume only one file can be updated at one time
 			}, 1500);
 		},
-		// deleteEngrams({}, engramTitles) {
+		async destroyEngrams({ commit }, engramTitles) {
+			commit('REMOVE_ENGRAMS', engramTitles);
 
-		// },
+			try {
+				await axios.delete('http://localhost:3000/engrams', {
+					headers: { 'Content-Type': 'application/json; charset=utf-8' },
+					data: { engramTitles },
+					withCredentials: true,
+					signal: abortController.signal,
+				}); // delete format is a bit different ...
+			} catch (error) {
+				if (axios.isCancel(error)) {
+					console.log('Request to delete engrams is canceled.');
+				} else {
+					console.error(error);
+				}
+			}
+		},
   },
   modules: {
   },

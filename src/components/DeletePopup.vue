@@ -22,7 +22,7 @@ export default {
 	emits: ['togglePopup', 'clearSelectedEngrams'],
 	methods: {
 		confirmHandler() {
-			this.$store.commit('REMOVE_ENGRAMS', this.selectedEngramTitles);
+			this.$store.dispatch('destroyEngrams', this.selectedEngramTitles);
 			this.$emit('clearSelectedEngrams');
 
 			this.$emit('togglePopup');
