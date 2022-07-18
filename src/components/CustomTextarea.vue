@@ -3,7 +3,7 @@
     v-model="textareaContent"
     ref="textarea"
     rows="1"
-		@input="$store.dispatch('setPutEngramRequest', engramTitle)"
+		@input="$store.dispatch('setPutEngramRequest', { engramTitle, commitMessage: 'auto save' })"
 		@blur="$emit('exitEditMode')"
     @focus="resizeTextarea"
     @keyup="resizeTextarea"

@@ -214,7 +214,7 @@ export default {
 		getEngramTitle(engramLink) { // remove * and {}
 			return engramLink.slice(1, -2);
 		},
-		stopPropagation(event) {
+		stopPropagation(event) { // this prevents entering edit mode while clicking on an engram link
 			event.stopPropagation();
 		},
 	},

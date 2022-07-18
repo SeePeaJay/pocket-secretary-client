@@ -22,7 +22,7 @@
 					<th>Word Count</th>
 					<th>Last Modified</th>
 				</tr>
-				<tr v-for="engramTitle in everyEngramTitleByUser" :key="engramTitle"> <!-- engramTitle should be unique -->
+				<tr v-for="engramTitle in allEngramTitlesByUser" :key="engramTitle"> <!-- engramTitle should be unique -->
 					<td style="text-align:center">
 						<input type="checkbox" v-model="selectedEngramTitles" :value="engramTitle"> <!-- must have the value bind for this to work -->
 					</td>
@@ -55,7 +55,7 @@ export default {
 		};
 	},
   computed: {
-		everyEngramTitleByUser() { // does not include Starred
+		allEngramTitlesByUser() { // does not include Starred
 			return this.$store.state.engrams.filter((engram) => engram.title !== 'Starred').map((engram) => engram.title).sort((a, b) => {
 				const titleA = a.toUpperCase();
 				const titleB = b.toUpperCase();
@@ -73,13 +73,13 @@ export default {
 		},
 		selectAll: {
 			get() {
-				return this.everyEngramTitleByUser ? this.selectedEngramTitles.length === this.everyEngramTitleByUser.length : false;
+				return this.allEngramTitlesByUser ? this.selectedEngramTitles.length === this.allEngramTitlesByUser.length : false;
 			},
 			set(value) {
 				const selected = [];
 
 				if (value) {
-					this.everyEngramTitleByUser.forEach((engramTitle) => {
+					this.allEngramTitlesByUser.forEach((engramTitle) => {
 						selected.push(engramTitle);
 					});
 				}

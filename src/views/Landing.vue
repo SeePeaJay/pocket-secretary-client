@@ -1,12 +1,14 @@
 <template>
-	<p v-if="isLoading">Loading ...</p>
-	<AppBar v-if="!isLoading"/>
-	<EngramEditor v-if="!isLoading && userIsLoggedIn()" engram-title="Starred" isEditable/>
-	<EngramEditor
-		v-if="!isLoading && !userIsLoggedIn()"
-		engram-title="Default Engram Page"
-		:unauthenticated-engram-blocks="unauthenticatedEngramBlocks"
-	/>
+	<template v-if="isLoading">
+		<p>Loading ...</p>
+	</template>
+	<template v-else>
+		<AppBar/>
+		<EngramEditor v-if="userIsLoggedIn()" engram-title="Starred" isEditable/>
+		<EngramEditor
+			v-else engram-title="Default Engram Page" :unauthenticated-engram-blocks="unauthenticatedEngramBlocks"
+		/>
+	</template>
 </template>
 
 <script>
@@ -28,7 +30,7 @@ export default {
 		};
 	},
 	methods: {
-		...mapActions(['fetchUserAndEveryEngram', 'createEngram']),
+		...mapActions(['fetchUserAndAllEngrams', 'createEngram']),
 		userIsLoggedIn() { // TODO: refactor when all components use Composition API
 			return !!store.state.username;
 		},
@@ -39,7 +41,7 @@ export default {
 		if (!this.userIsLoggedIn()) {
 			this.isLoading = true;
 
-			store.dispatch('fetchUserAndEveryEngram').then(() => {
+			store.dispatch('fetchUserAndAllEngrams').then(() => {
 				if (this.userIsLoggedIn()) { // without this, will attempt to create engram even if unauthed
 					const engramTitles = store.state.engrams.map((engram) => engram.title);
 
