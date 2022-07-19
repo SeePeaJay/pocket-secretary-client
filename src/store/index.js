@@ -17,27 +17,27 @@ export default createStore({
 		},
 	},
   mutations: {
-		SET_USERNAME_AND_ALL_ENGRAMS(state, { username, titleAndContentForAllEngrams }) {
+		SET_USERNAME_AND_ALL_ENGRAMS(state, { username, dataForAllEngrams }) {
 			state.username = username;
 			// console.log(`state.username: ${state.username}`);
 
-			state.engrams = titleAndContentForAllEngrams.map((engramTitleAndContent) => ({
-				title: engramTitleAndContent.title,
-				rootBlocks: Buffer.from(engramTitleAndContent.content, 'base64').toString('ascii').split(RULES.rootBlockSeparator),
+			state.engrams = dataForAllEngrams.map((engramData) => ({
+				title: engramData.title,
+				rootBlocks: Buffer.from(engramData.content, 'base64').toString('ascii').split(RULES.rootBlockSeparator),
+				lastModified: engramData.lastModified, // as a ISO 8601 UTC string
 			}));
+
 			// console.log(`state.engrams: ${JSON.stringify(state.engrams)}`);
 		},
 		REMOVE_ALL_USER_DATA(state) {
 			state.username = '';
 			state.engrams = [];
-
-			// console.log(`state.username: ${state.username}`);
-			// console.log(`state.engrams: ${state.engrams}`);
 		},
 		ADD_ENGRAM(state, engramTitle) {
 			state.engrams.push({
 				title: engramTitle,
 				rootBlocks: [`* ${engramTitle}`],
+				lastModified: `${new Date().toISOString().split('.')[0]}Z`,
 			});
 		},
 		REMOVE_ENGRAMS(state, engramTitles) {
@@ -47,15 +47,22 @@ export default createStore({
 			});
 		},
 		ADD_ENGRAM_BLOCK(state, { engramTitle, blockIndex, blockContent }) {
-			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks.splice(blockIndex, 0, blockContent);
-		},
-		SET_ENGRAM_BLOCK(state, { engramTitle, blockIndex, blockContent }) { // TODO: might need to set the whole engram if multiple simultaneous block edits are possible?
-			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks[blockIndex] = blockContent;
+			const engramToBeUpdated = state.engrams.find((engram) => engram.title === engramTitle);
 
-			// console.log([...new Proxy(state.engrams.find((engram) => engram.title === engramTitle).rootBlocks, [])]);
+			engramToBeUpdated.rootBlocks.splice(blockIndex, 0, blockContent);
+			engramToBeUpdated.lastModified = `${new Date().toISOString().split('.')[0]}Z`;
+		},
+		SET_ENGRAM_BLOCK(state, { engramTitle, blockIndex, blockContent }) { // might need to set the whole engram if multiple simultaneous block edits are possible?
+			const engramToBeUpdated = state.engrams.find((engram) => engram.title === engramTitle);
+
+			engramToBeUpdated.rootBlocks[blockIndex] = blockContent;
+			engramToBeUpdated.lastModified = `${new Date().toISOString().split('.')[0]}Z`;
 		},
 		REMOVE_ENGRAM_BLOCK(state, { engramTitle, blockIndex }) {
-			state.engrams.find((engram) => engram.title === engramTitle).rootBlocks.splice(blockIndex, 1);
+			const engramToBeUpdated = state.engrams.find((engram) => engram.title === engramTitle);
+
+			engramToBeUpdated.rootBlocks.splice(blockIndex, 1);
+			engramToBeUpdated.lastModified = `${new Date().toISOString().split('.')[0]}Z`;
 		},
   },
   actions: {
@@ -71,7 +78,7 @@ export default createStore({
 				if (response.data && !state.username) {
 					commit('SET_USERNAME_AND_ALL_ENGRAMS', {
 						username: response.data.username,
-						titleAndContentForAllEngrams: response.data.titleAndContentForAllEngrams,
+						dataForAllEngrams: response.data.dataForAllEngrams,
 					});
 				} else if (!response.data) {
 					console.log(response.data);

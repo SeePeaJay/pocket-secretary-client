@@ -18,9 +18,9 @@
 					<th >
 						<input type="checkbox" id="select-all-checkbox" v-model="selectAll">
 					</th>
-					<th>Title</th>
-					<th>Word Count</th>
-					<th>Last Modified</th>
+					<th @click="updateCurrentSortState('Title')">Title</th>
+					<th @click="updateCurrentSortState('Word Count')">Word Count</th>
+					<th @click="updateCurrentSortState('Last Modified')">Last Modified</th>
 				</tr>
 				<tr v-for="engramTitle in allEngramTitlesByUser" :key="engramTitle"> <!-- engramTitle should be unique -->
 					<td style="text-align:center">
@@ -30,7 +30,7 @@
 						<router-link :to="{ name: 'Engram', params: { engramTitle: engramTitle }}">{{ engramTitle }}</router-link>
 					</td>
 					<td style="text-align:center">{{ getWordCount(engramTitle) }}</td>
-					<td style="text-align:center">2022-07-01</td>
+					<td style="text-align:center">{{ getLastModifiedAsLocaleString(engramTitle) }}</td>
 				</tr>
 			</table>
 		</div>
@@ -52,24 +52,27 @@ export default {
 		return {
 			selectedEngramTitles: [],
 			popupShouldBeActive: false,
+			currentSortedColumn: 'Title',
+			sortIsReverse: false,
 		};
 	},
   computed: {
-		allEngramTitlesByUser() { // does not include Starred
-			return this.$store.state.engrams.filter((engram) => engram.title !== 'Starred').map((engram) => engram.title).sort((a, b) => {
-				const titleA = a.toUpperCase();
-				const titleB = b.toUpperCase();
+		allEngramTitlesByUser() { // does not include Starred, and are sorted based on current sorted column
+			const allEngramTitlesByUser = this.$store.state.engrams.filter((engram) => engram.title !== 'Starred').map((engram) => engram.title);
 
-				if (titleA < titleB) {
-					return -1;
-				}
+			if (this.currentSortedColumn === 'Title') {
+				allEngramTitlesByUser.sort(this.sortTitlesByAlphabeticalOrder);
+			} else if (this.currentSortedColumn === 'Word Count') {
+				allEngramTitlesByUser.sort(this.sortTitlesByDecreasingWordCount);
+			} else {
+				allEngramTitlesByUser.sort(this.sortTitlesByLastModified);
+			}
 
-				if (titleA > titleB) {
-					return 1;
-				}
+			if (this.sortIsReverse) {
+				allEngramTitlesByUser.reverse();
+			}
 
-				return 0;
-			});
+			return allEngramTitlesByUser;
 		},
 		selectAll: {
 			get() {
@@ -92,11 +95,38 @@ export default {
 		},
 	},
 	methods: {
-		togglePopup() {
-			this.popupShouldBeActive = !this.popupShouldBeActive;
+		sortTitlesByAlphabeticalOrder(titleA, titleB) {
+			if (titleA.toUpperCase() < titleB.toUpperCase()) {
+				return -1;
+			}
+
+			if (titleA.toUpperCase() > titleB.toUpperCase()) {
+				return 1;
+			}
+
+			return 0;
 		},
-		clearSelectedEngramTitles() {
-			this.selectedEngramTitles = [];
+		sortTitlesByDecreasingWordCount(titleA, titleB) {
+			if (this.getWordCount(titleA) < this.getWordCount(titleB)) {
+				return 1;
+			}
+
+			if (this.getWordCount(titleA) > this.getWordCount(titleB)) {
+				return -1;
+			}
+
+			return 0;
+		},
+		sortTitlesByLastModified(titleA, titleB) {
+			if (this.getLastModifiedAsDate(titleA).getTime() < this.getLastModifiedAsDate(titleB).getTime()) {
+				return 1;
+			}
+
+			if (this.getLastModifiedAsDate(titleA).getTime() > this.getLastModifiedAsDate(titleB).getTime()) {
+				return -1;
+			}
+
+			return 0;
 		},
 		getWordCount(engramTitle) { // TODO: ignore block markers?
 			const { rootBlocks } = this.$store.state.engrams.find((engram) => engram.title === engramTitle);
@@ -108,6 +138,36 @@ export default {
 
 				return accumulator;
 			}, 0);
+		},
+		getLastModifiedAsDate(engramTitle) {
+			return new Date(this.$store.state.engrams.find((engram) => engram.title === engramTitle).lastModified);
+		},
+		getLastModifiedAsLocaleString(engramTitle) {
+			return this.getLastModifiedAsDate(engramTitle).toLocaleString(
+				'en-CA',
+				{
+					year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
+				},
+			);
+				/*
+					* https://stackoverflow.com/a/36478563
+					* toLocaleString + arguments should make date appear as YYYY-MM-DD, HH:MM
+						* https://stackoverflow.com/a/63160519
+				*/
+		},
+		updateCurrentSortState(columnToSort) {
+			if (this.currentSortedColumn === columnToSort) {
+				this.sortIsReverse = !this.sortIsReverse;
+			} else {
+				this.currentSortedColumn = columnToSort;
+				this.sortIsReverse = false;
+			}
+		},
+		togglePopup() {
+			this.popupShouldBeActive = !this.popupShouldBeActive;
+		},
+		clearSelectedEngramTitles() {
+			this.selectedEngramTitles = [];
 		},
 	},
 };
