@@ -5,7 +5,7 @@
 			<h1>Engrams</h1>
 			<table>
 				<tr>
-					<th >
+					<th>
 						<img v-show="atLeastOneEngramTitleIsSelected"
 							id="active-trash-icon" src="../assets/trash.svg" alt="tabler trash icon" @click="togglePopup()"
 						/>
@@ -15,12 +15,50 @@
 					</th>
 				</tr>
 				<tr>
-					<th >
+					<th>
 						<input type="checkbox" id="select-all-checkbox" v-model="selectAll">
 					</th>
-					<th @click="updateCurrentSortState('Title')">Title</th>
-					<th @click="updateCurrentSortState('Word Count')">Word Count</th>
-					<th @click="updateCurrentSortState('Last Modified')">Last Modified</th>
+					<th
+						:class="currentSortedColumn === 'Title' ? 'column-header selected-column' : 'column-header'" @click="updateCurrentSortState('Title')"
+					>
+						<div id="div-in-title-column-header">
+							Title
+							<img v-show="currentSortedColumn === 'Title' && sortIsReverse"
+								class="column-header-icon" src="../assets/sort-descending.svg" alt="tabler sort descending icon"
+							/>
+							<img v-show="currentSortedColumn === 'Title' && !sortIsReverse"
+								class="column-header-icon" src="../assets/sort-ascending.svg" alt="tabler sort ascending icon"
+							/>
+						</div>
+					</th>
+					<th
+						:class="currentSortedColumn === 'Word Count' ? 'column-header selected-column' : 'column-header'"
+						@click="updateCurrentSortState('Word Count')"
+					>
+						<div>
+							Word Count
+							<img v-show="currentSortedColumn === 'Word Count' && sortIsReverse"
+								class="column-header-icon" src="../assets/sort-ascending.svg" alt="tabler sort ascending icon"
+							/>
+							<img v-show="currentSortedColumn === 'Word Count' && !sortIsReverse"
+								class="column-header-icon" src="../assets/sort-descending.svg" alt="tabler sort descending icon"
+							/>
+						</div>
+					</th>
+					<th
+						:class="currentSortedColumn === 'Last Modified' ? 'column-header selected-column' : 'column-header'"
+						@click="updateCurrentSortState('Last Modified')"
+					>
+						<div>
+							Last Modified
+							<img v-show="currentSortedColumn === 'Last Modified' && sortIsReverse"
+								class="column-header-icon" src="../assets/sort-ascending.svg" alt="tabler sort ascending icon"
+							/>
+							<img v-show="currentSortedColumn === 'Last Modified' && !sortIsReverse"
+								class="column-header-icon" src="../assets/sort-descending.svg" alt="tabler sort descending icon"
+							/>
+						</div>
+					</th>
 				</tr>
 				<tr v-for="engramTitle in allEngramTitlesByUser" :key="engramTitle"> <!-- engramTitle should be unique -->
 					<td style="text-align:center">
@@ -155,7 +193,7 @@ export default {
 						* https://stackoverflow.com/a/63160519
 				*/
 		},
-		updateCurrentSortState(columnToSort) {
+		updateCurrentSortState(columnToSort) { // updateSort
 			if (this.currentSortedColumn === columnToSort) {
 				this.sortIsReverse = !this.sortIsReverse;
 			} else {
@@ -173,41 +211,74 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .engrams-pane {
 	height: calc(100vh - 40px);
 	overflow-y: scroll;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-}
 
-.engrams-area {
-	width: 75%;
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	margin: 8px 0 8px;
+	.engrams-area {
+		width: 75%;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		margin: 8px 0 8px;
+	}
 }
 
 h1 {
 	margin-bottom: 5%;
 }
 
-#disabled-trash-icon {
+#disabled-trash-icon { // disabled-icon
 	filter: invert(85%) sepia(10%) saturate(8%) hue-rotate(319deg) brightness(104%) contrast(90%); /* #dddddd */
 }
 
-#active-trash-icon {
-filter: invert(58%) sepia(0%) saturate(420%) hue-rotate(146deg) brightness(94%) contrast(79%);
-}
+#active-trash-icon { // active-icon
+	filter: invert(58%) sepia(0%) saturate(420%) hue-rotate(146deg) brightness(94%) contrast(79%);
 
-#active-trash-icon:hover {
-	filter: invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%); /* #2c3e50 */
-	cursor: pointer;
+	&:hover {
+		filter: invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%); /* #2c3e50 */
+		cursor: pointer;
+	}
 }
 
 table {
 	width: 100%;
 }
+
+.column-header {
+	&:hover {
+		cursor: pointer;
+		text-decoration: underline;
+	}
+
+	div { /* to align icon with column header */
+		display: flex;
+		align-items: center;
+
+		&:not(#div-in-title-column-header) {
+			justify-content: center;
+		}
+
+		&:hover {
+			cursor: pointer;
+			text-decoration: underline;
+		}
+	}
+}
+
+.column-header-icon {
+	width: 16px;
+	height: 16px;
+
+	filter: invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%); /* #2c3e50 */
+}
+
+.selected-column {
+	text-decoration: underline;
+}
+
 </style>
