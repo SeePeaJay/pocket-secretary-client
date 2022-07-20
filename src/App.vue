@@ -34,9 +34,22 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: $base-color;
+  color: $default-color;
 	display: flex;
 	flex-direction: column;
+}
+
+.icon { // generic icon TODO: change to clickable?
+	filter: $inactive-filter;
+
+	&:hover {
+		filter: $default-filter;
+		cursor: pointer;
+	}
+
+	&.disabled { // if disabled
+		filter: $disabled-filter;
+	}
 }
 
 .engram-link {
@@ -46,7 +59,7 @@ export default {
 	text-decoration: none;
 	color: $active-link-color;
 
-	img {
+	img { // engram link icon, specifically
 		width: 1em;
 		height: 1em;
 		filter: $active-link-filter;
@@ -63,13 +76,16 @@ export default {
 	&:hover {
 		text-decoration: underline;
 	}
-}
 
-.inactive { /* has to be below .engram-link to avoid being overwritten by it */
-	color: $inactive-color;
+	&.inactive { // if inactive/empty
+		color: $inactive-color;
 
-	img {
-		filter: $inactive-filter;
+		img {
+			filter: $inactive-filter;
+		}
 	}
 }
+
+// .inactive { /* has to be below .engram-link to avoid being overwritten by it */
+// }
 </style>

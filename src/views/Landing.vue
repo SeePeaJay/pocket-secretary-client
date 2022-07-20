@@ -57,7 +57,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 p {
   position: absolute;
   top: 50%;
@@ -73,7 +73,7 @@ p {
 
 @keyframes color-change {
   0% { color: white; }
-  50% { color: #2c3e50; }
+  50% { color: $default-color; }
   100% { color: white; }
 }
 </style>

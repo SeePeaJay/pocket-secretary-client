@@ -1,6 +1,14 @@
-$base-color: #2c3e50;
+$default-color: #2c3e50;
 $disabled-color: #dddddd;
 $inactive-color: #888888;
 $active-link-color: #0645ad;
-$active-link-filter: invert(10%) sepia(76%) saturate(6849%) hue-rotate(214deg) brightness(96%) contrast(95%);
+
+$default-filter: invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%);
+$disabled-filter: invert(85%) sepia(10%) saturate(8%) hue-rotate(319deg) brightness(104%) contrast(90%);
+/* #dddddd */
 $inactive-filter: invert(58%) sepia(0%) saturate(420%) hue-rotate(146deg) brightness(94%) contrast(79%);
+$active-link-filter: invert(10%) sepia(76%) saturate(6849%) hue-rotate(214deg) brightness(96%) contrast(95%);
+$starred-filter: invert(75%) sepia(64%) saturate(812%) hue-rotate(359deg) brightness(102%) contrast(103%);
+/* taken from Things */
+$alert-filter: invert(28%) sepia(100%) saturate(7376%) hue-rotate(359deg) brightness(113%) contrast(123%);
+/* #ff0000 */

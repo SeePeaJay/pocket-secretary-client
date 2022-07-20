@@ -15,6 +15,50 @@ export default createStore({
 		engramRootBlocks: (state) => (engramTitle) => {
 			return state.engrams.find((engram) => engram.title === engramTitle).rootBlocks;
 		},
+		allEngramTitlesByUser: (state) => (sortFunction, sortIsReverse) => { // does not include Starred, and are sorted based on current sorted column
+			// const allEngramTitlesByUser = state.engrams.filter((engram) => engram.title !== 'Starred').map((engram) => engram.title);
+
+			// if (currentSortedColumn === 'Title') {
+			// 	allEngramTitlesByUser.sort(sortTitlesByAlphabeticalOrder);
+			// } else if (currentSortedColumn === 'Word Count') {
+			// 	allEngramTitlesByUser.sort(sortTitlesByDecreasingWordCount);
+			// } else {
+			// 	allEngramTitlesByUser.sort(sortTitlesByLastModified);
+			// }
+
+			// if (sortIsReverse) {
+			// 	allEngramTitlesByUser.reverse();
+			// }
+
+			return sortIsReverse
+				? state.engrams.filter((engram) => engram.title !== 'Starred').map((engram) => engram.title).sort(sortFunction).reverse()
+				: state.engrams.filter((engram) => engram.title !== 'Starred').map((engram) => engram.title).sort(sortFunction);
+		},
+		wordCount: (state, getters) => (engramTitle) => { // TODO: ignore block markers?
+			return getters.engramRootBlocks(engramTitle).reduce((accumulator, currentValue) => {
+				if (currentValue) {
+					return accumulator + currentValue.trim().split(/[\n\r\s]+/).length; // words are characters delimited by any amount of whitespaces or newlines
+				}
+
+				return accumulator;
+			}, 0);
+		},
+		lastModifiedDate: (state) => (engramTitle) => {
+			return new Date(state.engrams.find((engram) => engram.title === engramTitle).lastModified);
+		},
+		lastModifiedDateAsLocaleString: (state, getters) => (engramTitle) => {
+			return getters.lastModifiedDate(engramTitle).toLocaleString(
+				'en-CA',
+				{
+					year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
+				},
+			);
+				/*
+		 			* https://stackoverflow.com/a/36478563
+		 			* toLocaleString + arguments should make date appear as YYYY-MM-DD, HH:MM
+		 				* https://stackoverflow.com/a/63160519
+		 		*/
+		},
 	},
   mutations: {
 		SET_USERNAME_AND_ALL_ENGRAMS(state, { username, dataForAllEngrams }) {

@@ -6,8 +6,8 @@
 				<li v-for="(engramTitle, index) of selectedEngramTitles" :key="index">{{ engramTitle }}</li>
 			</ul>
 			<div id="buttons">
-				<img id="confirm" class="button" src="../assets/check.svg" alt="tabler check icon" @click="confirmHandler()" />
-				<img id="close" class="button" src="../assets/x.svg" alt="tabler x icon" @click="$emit('togglePopup')" />
+				<img id="confirm" class="button icon" src="../assets/check.svg" alt="tabler check icon" @click="confirmHandler()" />
+				<img id="close" class="button icon" src="../assets/x.svg" alt="tabler x icon" @click="$emit('togglePopup')" />
 			</div>
 		</div>
 	</div>
@@ -34,7 +34,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 #popup-with-background {
 	position: fixed;
 	top: 0;
@@ -50,7 +50,7 @@ export default {
 }
 
 #popup {
-	background: #FFF;
+	background: white;
 	padding: 32px;
 	border-radius: 12px;
 
@@ -74,17 +74,10 @@ ul {
 }
 
 .button {
-	filter: invert(58%) sepia(0%) saturate(420%) hue-rotate(146deg) brightness(94%) contrast(79%); /* #888888 */
 	margin: 12px 12px -12px;
 }
 
 #confirm:hover {
-	cursor: pointer;
-	filter: invert(28%) sepia(100%) saturate(7376%) hue-rotate(359deg) brightness(113%) contrast(123%); /* #ff0000 */
-}
-
-#close:hover {
-	cursor: pointer;
-	filter: invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%); /* #2c3e50 */
+	filter: $alert-filter;
 }
 </style>

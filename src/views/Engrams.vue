@@ -7,10 +7,10 @@
 				<tr>
 					<th>
 						<img v-show="atLeastOneEngramTitleIsSelected"
-							id="active-trash-icon" src="../assets/trash.svg" alt="tabler trash icon" @click="togglePopup()"
+							class="icon" src="../assets/trash.svg" alt="tabler trash icon" @click="togglePopup()"
 						/>
 						<img v-show="!atLeastOneEngramTitleIsSelected"
-							id="disabled-trash-icon" src="../assets/trash-off.svg" alt="tabler trash icon"
+							class="icon disabled" src="../assets/trash-off.svg" alt="tabler trash icon"
 						/>
 					</th>
 				</tr>
@@ -19,48 +19,48 @@
 						<input type="checkbox" id="select-all-checkbox" v-model="selectAll">
 					</th>
 					<th
-						:class="currentSortedColumn === 'Title' ? 'column-header selected-column' : 'column-header'" @click="updateCurrentSortState('Title')"
+						:class="currentSortFunction === sortTitlesByAlphabeticalOrder ? 'column-header selected' : 'column-header'" @click="updateSort(sortTitlesByAlphabeticalOrder)"
 					>
 						<div id="div-in-title-column-header">
 							Title
-							<img v-show="currentSortedColumn === 'Title' && sortIsReverse"
+							<img v-show="currentSortFunction === sortTitlesByAlphabeticalOrder && sortIsReverse"
 								class="column-header-icon" src="../assets/sort-descending.svg" alt="tabler sort descending icon"
 							/>
-							<img v-show="currentSortedColumn === 'Title' && !sortIsReverse"
+							<img v-show="currentSortFunction === sortTitlesByAlphabeticalOrder && !sortIsReverse"
 								class="column-header-icon" src="../assets/sort-ascending.svg" alt="tabler sort ascending icon"
 							/>
 						</div>
 					</th>
 					<th
-						:class="currentSortedColumn === 'Word Count' ? 'column-header selected-column' : 'column-header'"
-						@click="updateCurrentSortState('Word Count')"
+						:class="currentSortFunction === sortTitlesByWordCount ? 'column-header selected' : 'column-header'"
+						@click="updateSort(sortTitlesByWordCount)"
 					>
 						<div>
 							Word Count
-							<img v-show="currentSortedColumn === 'Word Count' && sortIsReverse"
+							<img v-show="currentSortFunction === sortTitlesByWordCount && sortIsReverse"
 								class="column-header-icon" src="../assets/sort-ascending.svg" alt="tabler sort ascending icon"
 							/>
-							<img v-show="currentSortedColumn === 'Word Count' && !sortIsReverse"
+							<img v-show="currentSortFunction === sortTitlesByWordCount && !sortIsReverse"
 								class="column-header-icon" src="../assets/sort-descending.svg" alt="tabler sort descending icon"
 							/>
 						</div>
 					</th>
 					<th
-						:class="currentSortedColumn === 'Last Modified' ? 'column-header selected-column' : 'column-header'"
-						@click="updateCurrentSortState('Last Modified')"
+						:class="currentSortFunction === sortTitlesByLastModified ? 'column-header selected' : 'column-header'"
+						@click="updateSort(sortTitlesByLastModified)"
 					>
 						<div>
 							Last Modified
-							<img v-show="currentSortedColumn === 'Last Modified' && sortIsReverse"
+							<img v-show="currentSortFunction === sortTitlesByLastModified && sortIsReverse"
 								class="column-header-icon" src="../assets/sort-ascending.svg" alt="tabler sort ascending icon"
 							/>
-							<img v-show="currentSortedColumn === 'Last Modified' && !sortIsReverse"
+							<img v-show="currentSortFunction === sortTitlesByLastModified && !sortIsReverse"
 								class="column-header-icon" src="../assets/sort-descending.svg" alt="tabler sort descending icon"
 							/>
 						</div>
 					</th>
 				</tr>
-				<tr v-for="engramTitle in allEngramTitlesByUser" :key="engramTitle"> <!-- engramTitle should be unique -->
+				<tr v-for="engramTitle in allEngramTitlesByUser(currentSortFunction, sortIsReverse)" :key="engramTitle"> <!-- engramTitle should be unique -->
 					<td style="text-align:center">
 						<input type="checkbox" v-model="selectedEngramTitles" :value="engramTitle"> <!-- must have the value bind for this to work -->
 					</td>
@@ -69,16 +69,20 @@
 							{{ engramTitle }}
 						</router-link>
 					</td>
-					<td style="text-align:center">{{ getWordCount(engramTitle) }}</td>
-					<td style="text-align:center">{{ getLastModifiedAsLocaleString(engramTitle) }}</td>
+					<td style="text-align:center">{{ wordCount(engramTitle) }}</td>
+					<td style="text-align:center">{{ lastModifiedDateAsLocaleString(engramTitle) }}</td>
 				</tr>
 			</table>
 		</div>
 	</div>
-	<DeletePopup v-if="popupShouldBeActive" :selected-engram-titles="selectedEngramTitles" @toggle-popup="togglePopup()" @clear-selected-engrams="clearSelectedEngramTitles()"/>
+	<DeletePopup v-if="popupShouldBeActive"
+		:selected-engram-titles="selectedEngramTitles"
+		@toggle-popup="togglePopup()" @clear-selected-engrams="clearSelectedEngramTitles()"
+	/>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import AppBar from '../components/AppBar.vue';
 import DeletePopup from '../components/DeletePopup.vue';
 
@@ -92,37 +96,23 @@ export default {
 		return {
 			selectedEngramTitles: [],
 			popupShouldBeActive: false,
-			currentSortedColumn: 'Last Modified',
 			sortIsReverse: false,
+			currentSortFunction: this.sortTitlesByLastModified,
 		};
 	},
   computed: {
-		allEngramTitlesByUser() { // does not include Starred, and are sorted based on current sorted column
-			const allEngramTitlesByUser = this.$store.state.engrams.filter((engram) => engram.title !== 'Starred').map((engram) => engram.title);
-
-			if (this.currentSortedColumn === 'Title') {
-				allEngramTitlesByUser.sort(this.sortTitlesByAlphabeticalOrder);
-			} else if (this.currentSortedColumn === 'Word Count') {
-				allEngramTitlesByUser.sort(this.sortTitlesByDecreasingWordCount);
-			} else {
-				allEngramTitlesByUser.sort(this.sortTitlesByLastModified);
-			}
-
-			if (this.sortIsReverse) {
-				allEngramTitlesByUser.reverse();
-			}
-
-			return allEngramTitlesByUser;
-		},
-		selectAll: {
+		...mapGetters(['allEngramTitlesByUser', 'wordCount', 'lastModifiedDate', 'lastModifiedDateAsLocaleString']),
+		selectAll: { // https://stackoverflow.com/a/38033792
 			get() {
-				return this.allEngramTitlesByUser ? this.selectedEngramTitles.length === this.allEngramTitlesByUser.length : false;
+				return this.allEngramTitlesByUser(this.currentSortFunction, this.sortIsReverse)
+					? this.selectedEngramTitles.length === this.allEngramTitlesByUser(this.currentSortFunction, this.sortIsReverse).length
+					: false;
 			},
 			set(value) {
 				const selected = [];
 
 				if (value) {
-					this.allEngramTitlesByUser.forEach((engramTitle) => {
+					this.allEngramTitlesByUser(this.currentSortFunction, this.sortIsReverse).forEach((engramTitle) => {
 						selected.push(engramTitle);
 					});
 				}
@@ -146,60 +136,33 @@ export default {
 
 			return 0;
 		},
-		sortTitlesByDecreasingWordCount(titleA, titleB) {
-			if (this.getWordCount(titleA) < this.getWordCount(titleB)) {
+		sortTitlesByWordCount(titleA, titleB) {
+			if (this.wordCount(titleA) < this.wordCount(titleB)) {
 				return 1;
 			}
 
-			if (this.getWordCount(titleA) > this.getWordCount(titleB)) {
+			if (this.wordCount(titleA) > this.wordCount(titleB)) {
 				return -1;
 			}
 
 			return 0;
 		},
 		sortTitlesByLastModified(titleA, titleB) {
-			if (this.getLastModifiedAsDate(titleA).getTime() < this.getLastModifiedAsDate(titleB).getTime()) {
+			if (this.lastModifiedDate(titleA).getTime() < this.lastModifiedDate(titleB).getTime()) {
 				return 1;
 			}
 
-			if (this.getLastModifiedAsDate(titleA).getTime() > this.getLastModifiedAsDate(titleB).getTime()) {
+			if (this.lastModifiedDate(titleA).getTime() > this.lastModifiedDate(titleB).getTime()) {
 				return -1;
 			}
 
 			return 0;
 		},
-		getWordCount(engramTitle) { // TODO: ignore block markers?
-			const { rootBlocks } = this.$store.state.engrams.find((engram) => engram.title === engramTitle);
-
-			return rootBlocks.reduce((accumulator, currentValue) => {
-				if (currentValue) {
-					return accumulator + currentValue.trim().split(/[\n\r\s]+/).length; // words are characters delimited by any amount of whitespaces or newlines
-				}
-
-				return accumulator;
-			}, 0);
-		},
-		getLastModifiedAsDate(engramTitle) {
-			return new Date(this.$store.state.engrams.find((engram) => engram.title === engramTitle).lastModified);
-		},
-		getLastModifiedAsLocaleString(engramTitle) {
-			return this.getLastModifiedAsDate(engramTitle).toLocaleString(
-				'en-CA',
-				{
-					year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
-				},
-			);
-				/*
-					* https://stackoverflow.com/a/36478563
-					* toLocaleString + arguments should make date appear as YYYY-MM-DD, HH:MM
-						* https://stackoverflow.com/a/63160519
-				*/
-		},
-		updateCurrentSortState(columnToSort) { // updateSort
-			if (this.currentSortedColumn === columnToSort) {
+		updateSort(newSortFunction) {
+			if (this.currentSortFunction === newSortFunction) {
 				this.sortIsReverse = !this.sortIsReverse;
 			} else {
-				this.currentSortedColumn = columnToSort;
+				this.currentSortFunction = newSortFunction;
 				this.sortIsReverse = false;
 			}
 		},
@@ -234,19 +197,6 @@ h1 {
 	margin-bottom: 5%;
 }
 
-#disabled-trash-icon { // disabled-icon
-	filter: invert(85%) sepia(10%) saturate(8%) hue-rotate(319deg) brightness(104%) contrast(90%); /* #dddddd */
-}
-
-#active-trash-icon { // active-icon
-	filter: invert(58%) sepia(0%) saturate(420%) hue-rotate(146deg) brightness(94%) contrast(79%);
-
-	&:hover {
-		filter: invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%); /* #2c3e50 */
-		cursor: pointer;
-	}
-}
-
 table {
 	width: 100%;
 }
@@ -270,16 +220,16 @@ table {
 			text-decoration: underline;
 		}
 	}
+
+	&.selected {
+		text-decoration: underline;
+	}
 }
 
 .column-header-icon {
 	width: 16px;
 	height: 16px;
 
-	filter: invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%); /* #2c3e50 */
-}
-
-.selected-column {
-	text-decoration: underline;
+	filter: $default-filter;
 }
 </style>

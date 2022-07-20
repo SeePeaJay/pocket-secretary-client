@@ -1,19 +1,19 @@
 <template>
 	<nav>
 		<template v-if="userIsLoggedIn()">
-			<router-link to="/engrams">
+			<router-link id="link-to-engrams" class="icon" to="/engrams">
 				<img src="../assets/stack-2.svg" alt="tabler stack-2 icon" />
 			</router-link>
-			<router-link class="starred-engram-link" :to="{ name: 'Engram', params: { engramTitle: 'Starred' }}">
+			<router-link id="link-to-starred" class="icon" :to="{ name: 'Engram', params: { engramTitle: 'Starred' }}">
 				<img src="../assets/star.svg" alt="tabler star icon" />
 			</router-link>
-			<a class="right-side" @click="logout()">
+			<a class="right-side icon" @click="logout()">
 				<img src="../assets/logout.svg" alt="tabler logout icon" />
 			</a>
 		</template>
 		<template v-else>
 			<span></span> <!-- a quick hack for fixing the login button in place when unauthed-->
-			<a class="right-side" href="/auth/github"> <!-- Github only supports auth via href; axios won't work -->
+			<a class="right-side icon" href="/auth/github"> <!-- Github only supports auth via href; axios won't work -->
 				<img src="../assets/login.svg" alt="tabler login icon" />
 			</a>
 		</template>
@@ -47,10 +47,11 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 nav {
 	width: 100%;
 	height: 40px;
+
 	display: flex;
 	justify-content: space-between;
 }
@@ -58,24 +59,19 @@ nav {
 nav > :not(span) {
 	width: 24px;
 	height: 24px;
-	filter: invert(58%) sepia(0%) saturate(420%) hue-rotate(146deg) brightness(94%) contrast(79%); /* #888888 */
-	margin: 8px;
-	cursor: pointer;
-}
 
-nav > *:hover {
-	filter: invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%); /* #2c3e50 */
+	margin: 8px;
 }
 
 .right-side {
 	margin-left: auto;
 }
 
-.starred-engram-link {
+#link-to-starred {
 	margin-left: 0;
-}
 
-.starred-engram-link:hover {
-	filter: invert(75%) sepia(64%) saturate(812%) hue-rotate(359deg) brightness(102%) contrast(103%); /* */
+	&:hover {
+		filter: $starred-filter;
+	}
 }
 </style>
