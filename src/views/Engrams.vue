@@ -65,7 +65,9 @@
 						<input type="checkbox" v-model="selectedEngramTitles" :value="engramTitle"> <!-- must have the value bind for this to work -->
 					</td>
 					<td>
-						<router-link :to="{ name: 'Engram', params: { engramTitle: engramTitle }}">{{ engramTitle }}</router-link>
+						<router-link class="engram-link" :to="{ name: 'Engram', params: { engramTitle: engramTitle }}">
+							{{ engramTitle }}
+						</router-link>
 					</td>
 					<td style="text-align:center">{{ getWordCount(engramTitle) }}</td>
 					<td style="text-align:center">{{ getLastModifiedAsLocaleString(engramTitle) }}</td>
@@ -90,7 +92,7 @@ export default {
 		return {
 			selectedEngramTitles: [],
 			popupShouldBeActive: false,
-			currentSortedColumn: 'Title',
+			currentSortedColumn: 'Last Modified',
 			sortIsReverse: false,
 		};
 	},
@@ -280,5 +282,4 @@ table {
 .selected-column {
 	text-decoration: underline;
 }
-
 </style>

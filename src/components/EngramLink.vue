@@ -1,12 +1,14 @@
 <template>
 	<router-link
 		v-if="engramDoesExist()"
+		class="engram-link"
 		:to="{ name: 'Engram', params: { engramTitle } }"
 	>
-		{{ engramTitle }}
+		<img src="../assets/3d-cube-sphere.svg" alt="tabler 3d cube sphere icon" />{{ engramTitle }}
+		<!-- dunno why, but engramTitle needs to stick right after the image; otherwise the two will be separated -->
 	</router-link>
-	<span v-else class="placeholder" @click="createAndGoToEngram()">
-		{{ engramTitle }}
+	<span v-else class="engram-link inactive" @click="createAndGoToEngram()">
+		<img src="../assets/3d-cube-sphere.svg" alt="tabler 3d cube sphere icon" />{{ engramTitle }}
 	</span>
 </template>
 
@@ -30,12 +32,3 @@ export default {
 	},
 };
 </script>
-
-<style scoped>
-/*empty link appearance: cursor, underline, and gray*/
-.placeholder {
-	text-decoration: underline;
-	color: gray;
-	cursor: pointer;
-}
-</style>
