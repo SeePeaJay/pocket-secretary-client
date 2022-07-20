@@ -49,6 +49,7 @@ export default {
 
 	&.disabled { // if disabled
 		filter: $disabled-filter;
+		cursor: default;
 	}
 }
 
