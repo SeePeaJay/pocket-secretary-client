@@ -75,7 +75,7 @@
 			</table>
 		</div>
 	</div>
-	<DeletePopup v-if="popupShouldBeActive"
+	<AlertPopup v-if="popupShouldBeActive"
 		:selected-engram-titles="selectedEngramTitles"
 		@toggle-popup="togglePopup()" @clear-selected-engrams="clearSelectedEngramTitles()"
 	/>
@@ -84,13 +84,13 @@
 <script>
 import { mapGetters } from 'vuex';
 import AppBar from '../components/AppBar.vue';
-import DeletePopup from '../components/DeletePopup.vue';
+import AlertPopup from '../components/AlertPopup.vue';
 
 export default {
   name: 'Engrams',
 	components: {
 		AppBar,
-		DeletePopup,
+		AlertPopup,
 	},
 	data() {
 		return {

@@ -15,7 +15,7 @@
 
 <script>
 export default {
-	name: 'DeletePopup',
+	name: 'AlertPopup',
 	props: {
 		selectedEngramTitles: Array,
 	},
@@ -62,7 +62,11 @@ export default {
 
 ul {
 	max-height: 340px;
-	width: 420px; /* this value happens to place the list items right under the start of paragraph */
+	// width: 420px;
+		/*
+			* this value happens to place the list items right under the start of paragraph
+			* TODO: breaks in mobile
+		*/
 	overflow-y: scroll;
 
 	padding-left: 0px; /* don't know why there's a padding-left by default, so this resets it. */
