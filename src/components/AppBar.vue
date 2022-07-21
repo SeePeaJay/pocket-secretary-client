@@ -47,7 +47,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 nav {
 	width: 100%;
 	height: 40px;
@@ -75,11 +75,11 @@ nav > :not(span) {
 	}
 }
 
-// .router-link-active { // TODO: how to use starred filter right after login
-// 	filter: $default-filter;
+.router-link-active { // TODO: how to use starred filter right after login
+	filter: $default-filter;
 
-// 	&#link-to-starred {
-// 		filter: $starred-filter;
-// 	}
-// }
+	&#link-to-starred {
+		filter: $starred-filter;
+	}
+}
 </style>

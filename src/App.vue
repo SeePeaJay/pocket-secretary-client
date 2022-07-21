@@ -23,7 +23,7 @@ export default {
 </script>
 
 <style lang="scss">
-// for global variables see variables.scss
+// for global variables and styles see main.scss
 
 * { /* TODO: perhaps there's a better way of resetting? */
 	margin: 0;
@@ -47,6 +47,12 @@ export default {
 		cursor: pointer;
 	}
 
+	// &:active { // TODO
+	// 	// background-color: red;
+	// 	// filter: $default-filter;
+	// 	border-radius: 3px;
+	// }
+
 	&.disabled { // if disabled
 		filter: $disabled-filter;
 		cursor: default;
@@ -61,10 +67,9 @@ export default {
 	color: $active-link-color;
 
 	img { // engram link icon, specifically
-		width: 1em;
-		height: 1em;
+		@extend .icon-with-text;
+
 		filter: $active-link-filter;
-		vertical-align: -12%;
 			/*
 				* don't know if there's a better way to align the icon with the engram link, but this method seems to work so far
 				* tried, but didn't work:

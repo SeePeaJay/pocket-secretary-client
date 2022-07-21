@@ -2,7 +2,7 @@
 	<!-- <div style="position: relative;"> TODO: icon right before actual content; need to change @click in EngramBlockEditor for this to work
 		<h1 style="position: absolute; left: -1em;">
 			<span>
-				<img src="../assets/dots-vertical.svg" alt="tabler dots vertical icon" style="width: 1em; height: 1em; vertical-align: -12%;" />
+				<img class="icon-with-text" src="../assets/dots-vertical.svg" alt="tabler dots vertical icon" />
 			</span>
 		</h1>
 	</div> -->
@@ -18,12 +18,15 @@
 				/>
 				<span v-else v-html="chunk"></span>
 			</template>
-			<img v-if="blockShouldHaveMoreOptions"
-				ref="more-options" class="icon"
-				src="../assets/dots-vertical.svg" alt="tabler dots vertical icon"
-				style="width: 1em; height: 1em; vertical-align: -12%;"
-				@click="moreOptionsHandler($event)"
-			/>
+			<template v-if="blockShouldHaveMoreOptions">
+				&nbsp;
+				<img
+					ref="more-options" class="icon icon-with-text"
+					src="../assets/dots-vertical.svg" alt="tabler dots vertical icon"
+					:style="contextMenuShouldAppear ? 'filter: brightness(0) saturate(100%) invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%);' : ''"
+					@click="moreOptionsHandler($event)"
+				/> <!-- $default-filter -->
+			</template>
 		</component>
 		<p v-else-if="htmlTagName === 'img'" v-html="html"></p> <!-- TODO: make it <img></img> instead? -->
 		<hr v-else>
@@ -249,7 +252,6 @@ export default {
 			}
 
 			this.contextMenuShouldAppear = !this.contextMenuShouldAppear;
-
 			const getBoundingClientRect = this.$refs['more-options'].getBoundingClientRect(); // TODO: make this value reactive; refs is not reactive
 			const offset = 12;
 			this.contextMenuXPosition = getBoundingClientRect.x + offset;

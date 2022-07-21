@@ -7,10 +7,13 @@
 				<tr>
 					<th>
 						<img v-show="atLeastOneEngramTitleIsSelected"
-							class="icon" src="../assets/trash.svg" alt="tabler trash icon" @click="togglePopup()"
-						/>
+							class="icon"
+							src="../assets/trash.svg" alt="tabler trash icon"
+							:style="popupShouldBeActive ? 'filter: invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%);' : ''"
+							@click="togglePopup()"
+						/> <!-- $default-filter -->
 						<img v-show="!atLeastOneEngramTitleIsSelected"
-							class="icon disabled" src="../assets/trash-off.svg" alt="tabler trash icon"
+							class="icon disabled" src="../assets/trash-off.svg" alt="tabler trash off icon"
 						/>
 					</th>
 				</tr>

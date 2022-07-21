@@ -56,8 +56,8 @@ ul {
 			cursor: pointer;
 
 			color: $default-color;
-			background: $disabled-color;
 
+			background: $disabled-color;
 			border-radius: 3px;
 
 			img {
@@ -66,12 +66,9 @@ ul {
 		}
 
 		img {
-			width: 1em;
-			height: 1em;
+			@extend .icon-with-text;
 
 			filter: $inactive-filter;
-
-			vertical-align: -12%;
 		}
 	}
 }
