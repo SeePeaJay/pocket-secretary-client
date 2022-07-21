@@ -1,6 +1,6 @@
 <template>
 	<CustomTextarea
-		v-if="isEditable && isOnEditMode"
+		v-if="blockIsEditable && isOnEditMode"
 		ref="customTextarea"
 		:engram-title="engramTitle"
 		:custom-textarea-index="blockIndex"
@@ -15,7 +15,9 @@
 	<RenderedEngramBlock
 		v-else
 		:blockContent="blockContent"
-		@click="if (isEditable) { enterEditMode(); }"
+		:block-is-editable="blockIsEditable"
+		:block-should-have-more-options="blockShouldHaveMoreOptions"
+		@enter-edit-mode="enterEditMode();"
 	/>
 </template>
 
@@ -33,7 +35,8 @@ export default {
 		engramTitle: String,
 		blockIndex: Number,
 		blockContent: String,
-		isEditable: Boolean,
+		blockIsEditable: Boolean,
+		blockShouldHaveMoreOptions: Boolean,
   },
 	emits: ['editNextBlock', 'editPreviousBlock', 'createAndEditNextBlock', 'deleteCurrentAndEditPreviousBlock'],
 	data() {
@@ -43,9 +46,6 @@ export default {
 		};
 	},
 	methods: {
-		userIsLoggedIn() { // TODO: refactor when all components use Composition API
-			return !!this.$store.state.username;
-		},
 		enterEditMode() {
 			this.isOnEditMode = true;
 			this.isExitingEditModeByEnterOrDeleteKey = false;

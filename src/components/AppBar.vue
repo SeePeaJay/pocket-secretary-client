@@ -1,6 +1,6 @@
 <template>
 	<nav>
-		<template v-if="userIsLoggedIn()">
+		<template v-if="userIsLoggedIn">
 			<router-link id="link-to-engrams" class="icon" to="/engrams">
 				<img src="../assets/stack-2.svg" alt="tabler stack-2 icon" />
 			</router-link>
@@ -21,16 +21,16 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex';
+import { mapGetters, mapMutations } from 'vuex';
 import axios from 'axios';
 
 export default {
 	name: 'AppBar',
+	computed: {
+		...mapGetters(['userIsLoggedIn']),
+	},
 	methods: {
 		...mapMutations(['REMOVE_ALL_USER_DATA']),
-		userIsLoggedIn() { // TODO: refactor if all components use Composition API
-			return !!this.$store.state.username;
-		},
 		async logout() {
 			try {
 				await axios.post('http://localhost:3000/logout', {}, { withCredentials: true });
@@ -74,4 +74,12 @@ nav > :not(span) {
 		filter: $starred-filter;
 	}
 }
+
+// .router-link-active { // TODO: how to use starred filter right after login
+// 	filter: $default-filter;
+
+// 	&#link-to-starred {
+// 		filter: $starred-filter;
+// 	}
+// }
 </style>

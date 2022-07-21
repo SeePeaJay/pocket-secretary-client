@@ -4,7 +4,7 @@
 	</template>
 	<template v-else>
 		<AppBar/>
-		<EngramEditor v-if="userIsLoggedIn()" engram-title="Starred" isEditable/>
+		<EngramEditor v-if="userIsLoggedIn" engram-title="Starred" engramIsEditable/>
 		<EngramEditor
 			v-else engram-title="Default Engram Page" :unauthenticated-engram-blocks="unauthenticatedEngramBlocks"
 		/>
@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import store from '../store';
 import AppBar from '../components/AppBar.vue';
 import EngramEditor from '../components/EngramEditor.vue';
@@ -29,20 +29,20 @@ export default {
 			isLoading: false,
 		};
 	},
+	computed: {
+		...mapGetters(['userIsLoggedIn']),
+	},
 	methods: {
 		...mapActions(['fetchUserAndAllEngrams', 'createEngram']),
-		userIsLoggedIn() { // TODO: refactor when all components use Composition API
-			return !!store.state.username;
-		},
 	},
 	created() {
 		console.log(`At Landing's created(), user is: ${store.state.username}`);
 
-		if (!this.userIsLoggedIn()) {
+		if (!this.userIsLoggedIn) {
 			this.isLoading = true;
 
 			store.dispatch('fetchUserAndAllEngrams').then(() => {
-				if (this.userIsLoggedIn()) { // without this, will attempt to create engram even if unauthed
+				if (this.userIsLoggedIn) { // without this, will attempt to create engram even if unauthed
 					const engramTitles = store.state.engrams.map((engram) => engram.title);
 
 					if (!engramTitles.includes('Starred')) {

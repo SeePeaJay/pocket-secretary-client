@@ -1,6 +1,10 @@
 <template>
 	<AppBar />
-	<EngramEditor :engram-title="engramTitle" isEditable />
+	<EngramEditor
+		:engram-title="engramTitle"
+		engramIsEditable
+		:engram-should-have-more-options="engramTitle !== 'Starred' ? true : false"
+	/>
 </template>
 
 <script>

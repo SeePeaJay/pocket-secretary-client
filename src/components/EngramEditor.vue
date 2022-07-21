@@ -7,7 +7,8 @@
 				:engram-title="engramTitle"
 				:block-index="index"
 				:block-content="engramBlock"
-				:is-editable="isEditable"
+				:block-is-editable="engramIsEditable"
+				:block-should-have-more-options="engramShouldHaveMoreOptions && index === 0 ? true : false"
 				@edit-previous-block="editPreviousBlock"
 				@edit-next-block="editNextBlock"
 				@create-and-edit-next-block="createAndEditNextBlock"
@@ -32,15 +33,16 @@ export default {
   props: {
 		engramTitle: String,
 		unauthenticatedEngramBlocks: Array,
-		isEditable: Boolean,
+		engramIsEditable: Boolean,
+		engramShouldHaveMoreOptions: Boolean,
   },
 	setup(props) {
 		const store = useStore();
 
 		const engramBlockEditors = ref([]);
-		const userIsLoggedIn = () => !!store.state.username; // TODO: refactor when all components use Composition API
+		const userIsLoggedIn = computed(() => store.getters.userIsLoggedIn);
 		const engramBlocks = computed(() => {
-			if (userIsLoggedIn()) {
+			if (userIsLoggedIn.value) {
 				return store.getters.engramRootBlocks(props.engramTitle);
 			}
 

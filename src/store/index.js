@@ -12,24 +12,10 @@ export default createStore({
 		engrams: [],
   },
 	getters: {
-		engramRootBlocks: (state) => (engramTitle) => {
-			return state.engrams.find((engram) => engram.title === engramTitle).rootBlocks;
+		userIsLoggedIn: (state) => {
+			return !!state.username;
 		},
 		allEngramTitlesByUser: (state) => (sortFunction, sortIsReverse) => { // does not include Starred, and are sorted based on current sorted column
-			// const allEngramTitlesByUser = state.engrams.filter((engram) => engram.title !== 'Starred').map((engram) => engram.title);
-
-			// if (currentSortedColumn === 'Title') {
-			// 	allEngramTitlesByUser.sort(sortTitlesByAlphabeticalOrder);
-			// } else if (currentSortedColumn === 'Word Count') {
-			// 	allEngramTitlesByUser.sort(sortTitlesByDecreasingWordCount);
-			// } else {
-			// 	allEngramTitlesByUser.sort(sortTitlesByLastModified);
-			// }
-
-			// if (sortIsReverse) {
-			// 	allEngramTitlesByUser.reverse();
-			// }
-
 			return sortIsReverse
 				? state.engrams.filter((engram) => engram.title !== 'Starred').map((engram) => engram.title).sort(sortFunction).reverse()
 				: state.engrams.filter((engram) => engram.title !== 'Starred').map((engram) => engram.title).sort(sortFunction);
@@ -58,6 +44,9 @@ export default createStore({
 		 			* toLocaleString + arguments should make date appear as YYYY-MM-DD, HH:MM
 		 				* https://stackoverflow.com/a/63160519
 		 		*/
+		},
+		engramRootBlocks: (state) => (engramTitle) => {
+			return state.engrams.find((engram) => engram.title === engramTitle).rootBlocks;
 		},
 	},
   mutations: {

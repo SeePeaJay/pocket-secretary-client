@@ -1,5 +1,12 @@
 <template>
-	<div class="test"> <!-- div to make block clickable -->
+	<!-- <div style="position: relative;"> TODO: icon right before actual content; need to change @click in EngramBlockEditor for this to work
+		<h1 style="position: absolute; left: -1em;">
+			<span>
+				<img src="../assets/dots-vertical.svg" alt="tabler dots vertical icon" style="width: 1em; height: 1em; vertical-align: -12%;" />
+			</span>
+		</h1>
+	</div> -->
+	<div class="test" @click="if (blockIsEditable) { $emit('enterEditMode'); }"> <!-- div to make block clickable -->
 		<RenderedEngramList
 			v-if="htmlTagName === 'ul' || htmlTagName === 'ol'"
 			:ulOrOl="htmlTagName" :listNode="parseTreeForList.rootBlockNodes[0]" :engramLinkRegex="engramLinkRegex"
@@ -11,34 +18,53 @@
 				/>
 				<span v-else v-html="chunk"></span>
 			</template>
+			<img v-if="blockShouldHaveMoreOptions"
+				ref="more-options" class="icon"
+				src="../assets/dots-vertical.svg" alt="tabler dots vertical icon"
+				style="width: 1em; height: 1em; vertical-align: -12%;"
+				@click="moreOptionsHandler($event)"
+			/>
 		</component>
 		<p v-else-if="htmlTagName === 'img'" v-html="html"></p> <!-- TODO: make it <img></img> instead? -->
 		<hr v-else>
 	</div>
+	<ContextMenu v-if="contextMenuShouldAppear"
+		:x-position="contextMenuXPosition" :y-position="contextMenuYPosition"
+		@toggle-menu="moreOptionsHandler($event)"
+	/>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import Cryptarch from '../cryptarch/cryptarch';
 import { TREE_NODE_TYPES } from '../cryptarch/constants';
 import RenderedEngramList from './RenderedEngramList.vue';
 import EngramLink from './EngramLink.vue';
+import ContextMenu from './ContextMenu.vue';
 
 export default {
 	name: 'RenderedEngramBlock',
 	components: {
 		RenderedEngramList,
 		EngramLink,
+		ContextMenu,
 	},
 	props: {
 		blockContent: String,
+		blockIsEditable: Boolean,
+		blockShouldHaveMoreOptions: Boolean,
   },
+	emits: ['enterEditMode'],
 	data() {
 		return {
-			componentKey: 0,
 			engramLinkRegex: /(\*(?:.|\n(?! *\n)(?! *\d{0,9}\.))+?{})/, // bracket to include delimiter in result after split
+			contextMenuShouldAppear: false,
+			contextMenuXPosition: 0,
+			contextMenuYPosition: 0,
 		};
 	},
 	computed: {
+		...mapGetters(['userIsLoggedIn']),
 		isTextualBlock() { // check if currently rendered block contains textual info (not image or line breaks).
 			return this.htmlTagName !== 'img' && this.htmlTagName !== 'hr';
 		},
@@ -216,6 +242,18 @@ export default {
 		},
 		stopPropagation(event) { // this prevents entering edit mode while clicking on an engram link
 			event.stopPropagation();
+		},
+		moreOptionsHandler(event = null) {
+			if (event) {
+				this.stopPropagation(event);
+			}
+
+			this.contextMenuShouldAppear = !this.contextMenuShouldAppear;
+
+			const getBoundingClientRect = this.$refs['more-options'].getBoundingClientRect(); // TODO: make this value reactive; refs is not reactive
+			const offset = 12;
+			this.contextMenuXPosition = getBoundingClientRect.x + offset;
+			this.contextMenuYPosition = getBoundingClientRect.y + offset;
 		},
 	},
 };
