@@ -9,7 +9,7 @@
 						<img v-show="atLeastOneEngramTitleIsSelected"
 							class="icon"
 							src="../assets/trash.svg" alt="tabler trash icon"
-							:style="popupShouldBeActive ? 'filter: invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%);' : ''"
+							:style="alertPopupShouldAppear ? 'filter: invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%);' : ''"
 							@click="togglePopup()"
 						/> <!-- $default-filter -->
 						<img v-show="!atLeastOneEngramTitleIsSelected"
@@ -78,9 +78,9 @@
 			</table>
 		</div>
 	</div>
-	<AlertPopup v-if="popupShouldBeActive"
-		:selected-engram-titles="selectedEngramTitles"
-		@toggle-popup="togglePopup()" @clear-selected-engrams="clearSelectedEngramTitles()"
+	<AlertPopup v-if="alertPopupShouldAppear"
+		:engram-titles-to-delete="selectedEngramTitles"
+		@close-popup="togglePopup()" @clear-selected-engrams="clearSelectedEngramTitles()"
 	/>
 </template>
 
@@ -97,10 +97,10 @@ export default {
 	},
 	data() {
 		return {
-			selectedEngramTitles: [],
-			popupShouldBeActive: false,
-			sortIsReverse: false,
 			currentSortFunction: this.sortTitlesByLastModified,
+			sortIsReverse: false,
+			selectedEngramTitles: [],
+			alertPopupShouldAppear: false, // for styling
 		};
 	},
   computed: {
@@ -170,7 +170,7 @@ export default {
 			}
 		},
 		togglePopup() {
-			this.popupShouldBeActive = !this.popupShouldBeActive;
+			this.alertPopupShouldAppear = !this.alertPopupShouldAppear;
 		},
 		clearSelectedEngramTitles() {
 			this.selectedEngramTitles = [];

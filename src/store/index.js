@@ -46,7 +46,12 @@ export default createStore({
 		 		*/
 		},
 		engramRootBlocks: (state) => (engramTitle) => {
-			return state.engrams.find((engram) => engram.title === engramTitle).rootBlocks;
+			const foundEngram = state.engrams.find((engram) => engram.title === engramTitle);
+			if (foundEngram) { // for some reason, a route change still affects old EngramEditor's computed property that said, so this check is added; that said, this check is needed anyway for completeness
+				return foundEngram.rootBlocks;
+			}
+
+			return null;
 		},
 	},
   mutations: {

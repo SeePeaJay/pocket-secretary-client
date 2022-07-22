@@ -17,7 +17,8 @@
 		:blockContent="blockContent"
 		:block-is-editable="blockIsEditable"
 		:block-should-have-more-options="blockShouldHaveMoreOptions"
-		@enter-edit-mode="enterEditMode();"
+		@enter-edit-mode="enterEditMode()"
+		@open-menu="(positionCoordinates) => $emit('openMenu', positionCoordinates)"
 	/>
 </template>
 
@@ -38,7 +39,9 @@ export default {
 		blockIsEditable: Boolean,
 		blockShouldHaveMoreOptions: Boolean,
   },
-	emits: ['editNextBlock', 'editPreviousBlock', 'createAndEditNextBlock', 'deleteCurrentAndEditPreviousBlock'],
+	emits: [
+		'editNextBlock', 'editPreviousBlock', 'createAndEditNextBlock', 'deleteCurrentAndEditPreviousBlock', 'openMenu',
+	],
 	data() {
 		return {
 			isOnEditMode: false,

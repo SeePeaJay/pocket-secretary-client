@@ -1,13 +1,13 @@
 <template>
-	<div id="popup-with-background" @click.self="$emit('togglePopup')">
+	<div id="popup-with-background" @click.self="$emit('closePopup')">
 		<div id="popup">
-			<p><strong>Are you sure you want to delete the following engrams?</strong></p>
+			<p><strong>Are you sure you want to delete the following engram(s)?</strong></p>
 			<ul>
-				<li v-for="(engramTitle, index) of selectedEngramTitles" :key="index">{{ engramTitle }}</li>
+				<li v-for="(engramTitle, index) of engramTitlesToDelete" :key="index">{{ engramTitle }}</li>
 			</ul>
 			<div id="buttons">
 				<img id="confirm" class="button icon" src="../assets/check.svg" alt="tabler check icon" @click="confirmHandler()" />
-				<img id="close" class="button icon" src="../assets/x.svg" alt="tabler x icon" @click="$emit('togglePopup')" />
+				<img id="close" class="button icon" src="../assets/x.svg" alt="tabler x icon" @click="$emit('closePopup')" />
 			</div>
 		</div>
 	</div>
@@ -17,18 +17,21 @@
 export default {
 	name: 'AlertPopup',
 	props: {
-		selectedEngramTitles: Array,
+		engramTitlesToDelete: Array,
 	},
-	emits: ['togglePopup', 'clearSelectedEngrams'],
+	emits: ['closePopup', 'clearSelectedEngrams'],
 	methods: {
-		confirmHandler() {
-			this.$store.dispatch('destroyEngrams', {
-				engramTitles: this.selectedEngramTitles,
-				commitMessage: 'delete',
-			});
+		async confirmHandler() {
 			this.$emit('clearSelectedEngrams');
 
-			this.$emit('togglePopup');
+			this.$emit('closePopup');
+
+			this.$router.push('/engrams'); // in case we are in an engram view
+
+			await this.$store.dispatch('destroyEngrams', {
+				engramTitles: this.engramTitlesToDelete,
+				commitMessage: 'delete',
+			});
 		},
 	},
 };

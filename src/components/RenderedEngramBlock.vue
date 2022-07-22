@@ -24,17 +24,13 @@
 					ref="more-options" class="icon icon-with-text"
 					src="../assets/dots-vertical.svg" alt="tabler dots vertical icon"
 					:style="contextMenuShouldAppear ? 'filter: brightness(0) saturate(100%) invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%);' : ''"
-					@click="moreOptionsHandler($event)"
+					@click="openMenu($event)"
 				/> <!-- $default-filter -->
 			</template>
 		</component>
 		<p v-else-if="htmlTagName === 'img'" v-html="html"></p> <!-- TODO: make it <img></img> instead? -->
 		<hr v-else>
 	</div>
-	<ContextMenu v-if="contextMenuShouldAppear"
-		:x-position="contextMenuXPosition" :y-position="contextMenuYPosition"
-		@toggle-menu="moreOptionsHandler($event)"
-	/>
 </template>
 
 <script>
@@ -57,13 +53,11 @@ export default {
 		blockIsEditable: Boolean,
 		blockShouldHaveMoreOptions: Boolean,
   },
-	emits: ['enterEditMode'],
+	emits: ['enterEditMode', 'openMenu'],
 	data() {
 		return {
 			engramLinkRegex: /(\*(?:.|\n(?! *\n)(?! *\d{0,9}\.))+?{})/, // bracket to include delimiter in result after split
-			contextMenuShouldAppear: false,
-			contextMenuXPosition: 0,
-			contextMenuYPosition: 0,
+			contextMenuShouldAppear: false, // for styling
 		};
 	},
 	computed: {
@@ -246,16 +240,19 @@ export default {
 		stopPropagation(event) { // this prevents entering edit mode while clicking on an engram link
 			event.stopPropagation();
 		},
-		moreOptionsHandler(event = null) {
-			if (event) {
-				this.stopPropagation(event);
-			}
+		openMenu(event) {
+			this.stopPropagation(event);
 
 			this.contextMenuShouldAppear = !this.contextMenuShouldAppear;
+
 			const getBoundingClientRect = this.$refs['more-options'].getBoundingClientRect(); // TODO: make this value reactive; refs is not reactive
 			const offset = 12;
-			this.contextMenuXPosition = getBoundingClientRect.x + offset;
-			this.contextMenuYPosition = getBoundingClientRect.y + offset;
+			const positionCoordinates = {
+				x: getBoundingClientRect.x + offset,
+				y: getBoundingClientRect.y + offset,
+			};
+
+			this.$emit('openMenu', positionCoordinates);
 		},
 	},
 };

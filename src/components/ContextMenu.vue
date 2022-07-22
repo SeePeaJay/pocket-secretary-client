@@ -1,11 +1,11 @@
 <template>
-	<div id="menu-with-background" @click.self="$emit('toggleMenu')">
+	<div id="menu-with-background" @click.self="$emit('closeMenu')">
 		<ul id="context-menu" ref="context-menu" :style="`position: absolute; top: calc(${this.yPosition}px + 12px); left: calc(${this.xPosition}px + 12px)`">
 			<li id="star-list-item">
 				<img src="../assets/star.svg" alt="tabler star icon"/>
 				Star
 			</li>
-			<li id="delete-list-item">
+			<li id="delete-list-item" @click="$emit('openPopup')">
 				<img src="../assets/trash.svg" alt="tabler trash icon"/>
 				Delete
 			</li>
@@ -20,7 +20,7 @@ export default {
 		xPosition: Number,
 		yPosition: Number,
 	},
-	emits: ['toggleMenu'],
+	emits: ['closeMenu', 'openPopup'],
 };
 </script>
 
@@ -31,7 +31,7 @@ export default {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	z-index: 99;
+	z-index: 98;
 }
 
 ul {
