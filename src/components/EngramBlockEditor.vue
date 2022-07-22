@@ -14,6 +14,7 @@
 	/>
 	<RenderedEngramBlock
 		v-else
+		:engram-title="engramTitle"
 		:blockContent="blockContent"
 		:block-is-editable="blockIsEditable"
 		:block-should-have-more-options="blockShouldHaveMoreOptions"

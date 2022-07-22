@@ -13,8 +13,9 @@
 		/>
 		<component v-else-if="isTextualBlock" :is="htmlTagName"> <!-- if not list, image, or line break -->
 			<template v-for="(chunk, index) in htmlChunks" :key="index">
-				<EngramLink
-					v-if="engramLinkRegex.test(chunk)" :engramTitle="getEngramTitle(chunk)" @click="stopPropagation($event)"
+				<EngramLink v-if="engramLinkRegex.test(chunk)"
+					:engramTitle="getEngramTitleFrom(chunk)"
+					@click="(event) => event.stopPropagation()"
 				/>
 				<span v-else v-html="chunk"></span>
 			</template>
@@ -24,13 +25,18 @@
 					ref="more-options" class="icon icon-with-text"
 					src="../assets/dots-vertical.svg" alt="tabler dots vertical icon"
 					:style="contextMenuShouldAppear ? 'filter: brightness(0) saturate(100%) invert(21%) sepia(9%) saturate(2115%) hue-rotate(169deg) brightness(96%) contrast(89%);' : ''"
-					@click="openMenu($event)"
+					@click="(event) => { event.stopPropagation(); toggleMenu(); }"
 				/> <!-- $default-filter -->
 			</template>
 		</component>
 		<p v-else-if="htmlTagName === 'img'" v-html="html"></p> <!-- TODO: make it <img></img> instead? -->
 		<hr v-else>
 	</div>
+	<ContextMenu v-if="contextMenuShouldAppear"
+		:engram-title="engramTitle"
+		:x-position="contextMenuPosition.x" :y-position="contextMenuPosition.y"
+		@close-menu="toggleMenu()"
+	/>
 </template>
 
 <script>
@@ -49,6 +55,7 @@ export default {
 		ContextMenu,
 	},
 	props: {
+		engramTitle: String,
 		blockContent: String,
 		blockIsEditable: Boolean,
 		blockShouldHaveMoreOptions: Boolean,
@@ -58,6 +65,10 @@ export default {
 		return {
 			engramLinkRegex: /(\*(?:.|\n(?! *\n)(?! *\d{0,9}\.))+?{})/, // bracket to include delimiter in result after split
 			contextMenuShouldAppear: false, // for styling
+			contextMenuPosition: {
+				x: 0,
+				y: 0,
+			},
 		};
 	},
 	computed: {
@@ -234,25 +245,20 @@ export default {
 
 			return text;
 		},
-		getEngramTitle(engramLink) { // remove * and {}
+		getEngramTitleFrom(engramLink) { // remove * and {}
 			return engramLink.slice(1, -2);
 		},
-		stopPropagation(event) { // this prevents entering edit mode while clicking on an engram link
-			event.stopPropagation();
-		},
-		openMenu(event) {
-			this.stopPropagation(event);
+		toggleMenu() {
+			if (!this.contextMenuShouldAppear) {
+				this.contextMenuShouldAppear = true;
 
-			this.contextMenuShouldAppear = !this.contextMenuShouldAppear;
-
-			const getBoundingClientRect = this.$refs['more-options'].getBoundingClientRect(); // TODO: make this value reactive; refs is not reactive
-			const offset = 12;
-			const positionCoordinates = {
-				x: getBoundingClientRect.x + offset,
-				y: getBoundingClientRect.y + offset,
-			};
-
-			this.$emit('openMenu', positionCoordinates);
+				const getBoundingClientRect = this.$refs['more-options'].getBoundingClientRect(); // TODO: make this value reactive; refs is not reactive
+				const offset = 12;
+				this.contextMenuPosition.x = getBoundingClientRect.x + offset;
+				this.contextMenuPosition.y = getBoundingClientRect.y + offset;
+			} else {
+				this.contextMenuShouldAppear = false;
+			}
 		},
 	},
 };
@@ -262,8 +268,4 @@ export default {
 .test {
 	border: solid;
 }
-
-/* div >>> *:not(ul, li) {
-	display: inline;
-} */
 </style>

@@ -53,6 +53,15 @@ export default createStore({
 
 			return null;
 		},
+		engramTitleHasTag: (state) => (engramTitle, tag) => {
+			const foundEngram = state.engrams.find((engram) => engram.title === engramTitle);
+
+			if (foundEngram) {
+				return foundEngram.rootBlocks[0].includes(`${tag}`);
+			}
+
+			return null;
+		},
 	},
   mutations: {
 		SET_USERNAME_AND_ALL_ENGRAMS(state, { username, dataForAllEngrams }) {

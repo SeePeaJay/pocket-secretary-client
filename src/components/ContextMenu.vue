@@ -1,31 +1,70 @@
 <template>
-	<div id="menu-with-background" @click.self="$emit('closeMenu')">
-		<ul id="context-menu" ref="context-menu" :style="`position: absolute; top: calc(${this.yPosition}px + 12px); left: calc(${this.xPosition}px + 12px)`">
-			<li id="star-list-item">
+	<div id="context-menu-with-background" @click.self="$emit('closeMenu')">
+		<ul
+			ref="context-menu"
+			:style="`position: absolute; top: calc(${this.yPosition}px + 12px); left: calc(${this.xPosition}px + 12px)`"
+		>
+			<li v-if="!engramTitleHasTag(engramTitle, '#starred')" @click="starCurrentEngram(); $emit('closeMenu')">
 				<img src="../assets/star.svg" alt="tabler star icon"/>
 				Star
 			</li>
-			<li id="delete-list-item" @click="$emit('openPopup')">
+			<li v-else @click="unstarCurrentEngram()">
+				<StarOff class="icon-with-text" />
+				Unstar
+			</li>
+			<li id="delete-list-item" @click="toggleAlertPopup()">
 				<img src="../assets/trash.svg" alt="tabler trash icon"/>
 				Delete
 			</li>
 		</ul>
 	</div>
+	<AlertPopup v-if="alertPopupShouldAppear"
+		:engram-titles-to-delete="[engramTitle]"
+		@close-popup="toggleAlertPopup(); $emit('closeMenu');"
+	/> <!-- get rid of all "floating components" -->
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+import AlertPopup from './AlertPopup.vue';
+import StarOff from '../assets/StarOff.vue';
+
 export default {
 	name: 'ContextMenu',
+	components: {
+		AlertPopup,
+		StarOff,
+	},
 	props: {
+		engramTitle: String,
 		xPosition: Number,
 		yPosition: Number,
 	},
-	emits: ['closeMenu', 'openPopup'],
+	data() {
+		return {
+			alertPopupShouldAppear: false,
+		};
+	},
+	emits: ['closeMenu', 'starCurrentEngram', 'unstarCurrentEngram'],
+	computed: {
+		...mapGetters(['engramTitleHasTag']),
+	},
+	methods: {
+		starCurrentEngram() {
+			console.log('oh yes starred');
+		},
+		unstarCurrentEngram() { // prob diff enough to warrant separate functions
+			console.log('oh no unstarred');
+		},
+		toggleAlertPopup() {
+			this.alertPopupShouldAppear = !this.alertPopupShouldAppear;
+		},
+	},
 };
 </script>
 
 <style lang="scss" scoped>
-#menu-with-background {
+#context-menu-with-background {
 	position: fixed;
 	top: 0;
 	left: 0;

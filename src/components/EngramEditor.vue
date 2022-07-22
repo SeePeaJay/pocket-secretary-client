@@ -17,15 +17,6 @@
 			/>
 		</div>
   </div>
-	<ContextMenu v-if="contextMenuShouldAppear"
-		:x-position="contextMenuPosition.x" :y-position="contextMenuPosition.y"
-		@close-menu="toggleMenu()"
-		@open-popup="togglePopup()"
-	/>
-	<AlertPopup v-if="alertPopupShouldAppear"
-		:engram-titles-to-delete="[engramTitle]"
-		@close-popup="togglePopup(); toggleMenu();"
-	/> <!-- get rid of all "floating components" -->
 </template>
 
 <script>
@@ -34,15 +25,11 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import EngramBlockEditor from './EngramBlockEditor.vue';
-import ContextMenu from './ContextMenu.vue';
-import AlertPopup from './AlertPopup.vue';
 
 export default {
   name: 'EngramEditor',
 	components: {
 		EngramBlockEditor,
-		ContextMenu,
-		AlertPopup,
 	},
   props: {
 		engramTitle: String,
@@ -55,12 +42,6 @@ export default {
 		const store = useStore();
 
 		const engramBlockEditors = ref([]);
-		const contextMenuShouldAppear = ref(false);
-		const contextMenuPosition = ref({
-			x: 0,
-			y: 0,
-		});
-		const alertPopupShouldAppear = ref(false);
 
 		const userIsLoggedIn = computed(() => store.getters.userIsLoggedIn);
 		const engramBlocks = computed(() => {
@@ -141,19 +122,6 @@ export default {
 			return '';
 		}
 
-		function toggleMenu(positionCoordinates = null) {
-			contextMenuShouldAppear.value = !contextMenuShouldAppear.value;
-
-			if (positionCoordinates) {
-				contextMenuPosition.value.x = positionCoordinates.x;
-				contextMenuPosition.value.y = positionCoordinates.y;
-			}
-		}
-
-		function togglePopup() {
-			alertPopupShouldAppear.value = !alertPopupShouldAppear.value;
-		}
-
 		// make sure to reset the refs before each update
 		onBeforeUpdate(() => {
 			engramBlockEditors.value = [];
@@ -162,15 +130,10 @@ export default {
 		return {
 			engramBlocks,
 			engramBlockEditors,
-			contextMenuShouldAppear,
-			contextMenuPosition,
-			alertPopupShouldAppear,
 			editPreviousBlock,
 			editNextBlock,
 			createAndEditNextBlock,
 			deleteCurrentAndEditPreviousBlock,
-			toggleMenu,
-			togglePopup,
 		};
 	},
 };
