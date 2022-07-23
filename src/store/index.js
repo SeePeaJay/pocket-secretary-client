@@ -141,7 +141,7 @@ export default createStore({
 			// call axios to save newly created engram to Github
 			await dispatch('putEngram', { engramTitle, commitMessage: 'create' });
 		},
-		async putEngram({ state }, { engramTitle, commitMessage }) {
+		async putEngram({ state }, { engramTitle, commitMessage }) { // beware that commitMessage also determines server commit behaviour
 			try {
 				const matchedEngram = state.engrams.find((engram) => engram.title === engramTitle);
 				const engramContent = matchedEngram.rootBlocks.join('\n\n');

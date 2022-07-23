@@ -267,5 +267,7 @@ export default {
 <style scoped>
 .test {
 	border: solid;
+
+	white-space: pre-wrap;
 }
 </style>
